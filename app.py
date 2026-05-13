@@ -61,6 +61,13 @@ def get_portfolio():
     })
 
 
+@app.route("/api/history", methods=["GET"])
+def get_history():
+    snapshots = mongodb_client.get_snapshots(USER_ID, limit=30)
+    snapshots.reverse()
+    return jsonify(snapshots)
+
+
 @app.route("/api/watchlist", methods=["GET"])
 def get_watchlist():
     items = mongodb_client.get_watchlist(USER_ID)

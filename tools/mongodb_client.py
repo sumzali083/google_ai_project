@@ -48,8 +48,14 @@ def get_transactions(user_id: str, limit: int = 50) -> list[dict]:
 
 # ── Snapshots ─────────────────────────────────────────────────────────────────
 
-def save_snapshot(snapshot: dict):
-    _db()["snapshots"].insert_one(snapshot)
+def save_snapshot(user_id: str, total_value: float, total_cost: float):
+    from datetime import datetime, timezone
+    _db()["snapshots"].insert_one({
+        "user_id": user_id,
+        "total_value": total_value,
+        "total_cost": total_cost,
+        "snapshot_date": datetime.now(timezone.utc).isoformat(),
+    })
 
 
 def get_snapshots(user_id: str, limit: int = 30) -> list[dict]:

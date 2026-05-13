@@ -1,295 +1,527 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Portfolio Agent</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-  <style>
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --border: #2a2d3a;
-      --accent: #4f8ef7;
-      --green: #22c55e;
-      --red: #ef4444;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Portfolio Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #070b14;
+    --surface: #0f1623;
+    --surface2: #161f30;
+    --border: #1e2d45;
+    --accent: #3b82f6;
+    --accent2: #6366f1;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-    header {
-      padding: 1rem 2rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    header h1 { font-size: 1.25rem; font-weight: 600; }
-    header span { color: var(--accent); font-size: 1.4rem; }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(7,11,20,0.95);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  header h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 20px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
 
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 0;
-      height: calc(100vh - 57px);
-    }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    flex: 1;
+    height: calc(100vh - 65px);
+    overflow: hidden;
+  }
 
-    /* ── Left panel ── */
-    .main { overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+  .main { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
 
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1rem 1.25rem;
-    }
-    .card-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .card-value { font-size: 1.5rem; font-weight: 700; }
-    .card-value.up   { color: var(--green); }
-    .card-value.down { color: var(--red); }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card:hover::before { opacity: 1; }
+  .card-label { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .card-value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; font-family: 'JetBrains Mono', monospace; }
+  .card-value.green { color: var(--green); }
+  .card-value.red { color: var(--red); }
 
-    .section-title { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    th { text-align: left; color: var(--muted); font-weight: 500; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
-    td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
-    tr:last-child td { border-bottom: none; }
-    .up   { color: var(--green); }
-    .down { color: var(--red); }
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
 
-    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; }
-    canvas { max-height: 220px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--text3); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; padding: 8px 12px; }
+  td { padding: 12px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .ticker-cell { font-weight: 600; font-family: 'Inter', sans-serif; font-size: 14px; }
+  tr:hover td { background: var(--surface2); }
+  .gain { color: var(--green); }
+  .loss { color: var(--red); }
 
-    .risk-badge {
-      display: inline-block;
-      background: rgba(239,68,68,0.15);
-      color: var(--red);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 0.375rem;
-      padding: 0.3rem 0.6rem;
-      font-size: 0.78rem;
-      margin: 0.2rem;
-    }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .chart-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .chart-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 14px; }
 
-    /* ── Right chat panel ── */
-    .chat-panel {
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      background: var(--surface);
-    }
-    .chat-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; }
-    .messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-    .msg { max-width: 90%; border-radius: 0.75rem; padding: 0.65rem 0.9rem; font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-    .msg.user  { align-self: flex-end; background: var(--accent); color: #fff; }
-    .msg.agent { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); }
-    .msg.agent.loading { color: var(--muted); font-style: italic; }
+  .risks { display: flex; flex-wrap: wrap; gap: 8px; }
+  .risk-badge {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+  .risk-ok { color: var(--green); font-size: 13px; }
 
-    .chat-input { display: flex; gap: 0.5rem; padding: 0.75rem; border-top: 1px solid var(--border); }
-    .chat-input input {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      color: var(--text);
-      font-size: 0.875rem;
-      outline: none;
-    }
-    .chat-input input:focus { border-color: var(--accent); }
-    .chat-input button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-    .chat-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .chat-panel {
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chat-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    .suggestions { padding: 0 0.75rem 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .suggestion {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 0.375rem;
-      padding: 0.3rem 0.6rem;
-      font-size: 0.75rem;
-      color: var(--muted);
-      cursor: pointer;
-    }
-    .suggestion:hover { border-color: var(--accent); color: var(--text); }
-  </style>
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg {
+    max-width: 90%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .msg.user {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.agent {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+  .msg.agent p { margin-bottom: 6px; }
+  .msg.agent p:last-child { margin-bottom: 0; }
+  .msg.agent strong { color: white; font-weight: 600; }
+  .msg.agent ul, .msg.agent ol { padding-left: 18px; margin: 4px 0; }
+  .msg.agent li { margin-bottom: 3px; }
+  .msg.agent code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+  .msg.error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+    color: #fca5a5;
+    align-self: flex-start;
+    font-size: 12px;
+  }
+
+  .typing {
+    align-self: flex-start;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .typing span {
+    width: 6px; height: 6px;
+    background: var(--text3);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+  .suggestions {
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    border-top: 1px solid var(--border);
+  }
+  .sug {
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sug:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.08); }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .input-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-row input:focus { border-color: var(--accent); }
+  .input-row input::placeholder { color: var(--text3); }
+  .send-btn {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .send-btn svg { fill: white; width: 16px; height: 16px; }
+</style>
 </head>
 <body>
+
 <header>
-  <span>📈</span>
+  <div class="logo-mark">📈</div>
   <h1>Smart Portfolio Agent</h1>
+  <span class="badge">GEMINI 2.5 · VERTEX AI</span>
 </header>
 
 <div class="layout">
-  <!-- Dashboard -->
   <div class="main">
-    <!-- Summary cards -->
-    <div class="cards" id="summary-cards">
+    <div class="cards">
       <div class="card"><div class="card-label">Total Value</div><div class="card-value" id="total-value">—</div></div>
       <div class="card"><div class="card-label">Total Cost</div><div class="card-value" id="total-cost">—</div></div>
-      <div class="card"><div class="card-label">Unrealised P&L</div><div class="card-value" id="total-pnl">—</div></div>
-      <div class="card"><div class="card-label">P&L %</div><div class="card-value" id="total-pnl-pct">—</div></div>
+      <div class="card"><div class="card-label">Unrealised P&amp;L</div><div class="card-value" id="pnl">—</div></div>
+      <div class="card"><div class="card-label">P&amp;L %</div><div class="card-value" id="pnl-pct">—</div></div>
     </div>
 
-    <!-- Holdings table -->
-    <div class="chart-wrap">
-      <div class="section-title">Holdings</div>
-      <table>
-        <thead><tr><th>Ticker</th><th>Shares</th><th>Avg Cost</th><th>Price</th><th>Value</th><th>P&L</th><th>P&L %</th></tr></thead>
-        <tbody id="holdings-body"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">Loading...</td></tr></tbody>
-      </table>
-    </div>
-
-    <!-- Sector chart + risk warnings -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div class="chart-wrap">
-        <div class="section-title">Sector Allocation</div>
-        <canvas id="sector-chart"></canvas>
+    <div>
+      <div class="tabs">
+        <div class="tab active" data-tab="holdings">Holdings</div>
+        <div class="tab" data-tab="charts">Charts &amp; Risks</div>
+        <div class="tab" data-tab="history">Performance</div>
       </div>
-      <div class="chart-wrap">
-        <div class="section-title">Concentration Risks</div>
-        <div id="risk-list" style="color:var(--muted);font-size:0.85rem">No risks detected.</div>
+
+      <div id="tab-holdings" class="tab-content active" style="margin-top:16px">
+        <div class="section">
+          <table>
+            <thead><tr><th>Ticker</th><th>Shares</th><th>Avg Cost</th><th>Price</th><th>Value</th><th>P&amp;L</th><th>P&amp;L %</th></tr></thead>
+            <tbody id="holdings-body"><tr><td colspan="7" style="color:var(--text3);text-align:center;padding:32px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-charts" class="tab-content" style="margin-top:16px">
+        <div class="charts-row">
+          <div class="chart-box">
+            <div class="chart-title">Sector Allocation</div>
+            <canvas id="sector-chart" height="200"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">Concentration Risks</div>
+            <div class="risks" id="risks-container"><span style="color:var(--text3);font-size:13px">Load portfolio to see risks</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-history" class="tab-content" style="margin-top:16px">
+        <div class="chart-box">
+          <div class="chart-title">Portfolio Value Over Time</div>
+          <p id="history-empty" style="display:none;color:var(--text3);font-size:13px;padding:20px 0">No snapshots yet — ask the agent to "save a portfolio snapshot" to begin tracking.</p>
+          <canvas id="history-chart" height="180"></canvas>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Chat -->
   <div class="chat-panel">
-    <div class="chat-header">Ask your portfolio agent</div>
+    <div class="chat-header">
+      <div class="chat-dot"></div>
+      Portfolio Agent
+    </div>
     <div class="messages" id="messages">
-      <div class="msg agent">Hi! I'm your Smart Portfolio Agent. Ask me anything about your holdings, risk, or market data.</div>
+      <div class="msg agent">
+        Hi! I'm your <strong>Smart Portfolio Agent</strong> — powered by Gemini 2.5 &amp; MongoDB. Ask me anything about your holdings, or try one of the suggestions below.
+      </div>
     </div>
     <div class="suggestions">
-      <div class="suggestion" onclick="ask('Analyse my full portfolio')">Analyse my portfolio</div>
-      <div class="suggestion" onclick="ask('What are my biggest risks?')">Biggest risks</div>
-      <div class="suggestion" onclick="ask('Get price of AAPL')">AAPL price</div>
-      <div class="suggestion" onclick="ask('Show my watchlist')">Watchlist</div>
+      <span class="sug" onclick="send(this.textContent)">Analyse my portfolio</span>
+      <span class="sug" onclick="send(this.textContent)">What are my biggest risks?</span>
+      <span class="sug" onclick="send(this.textContent)">Compare to S&P 500</span>
+      <span class="sug" onclick="send(this.textContent)">AAPL price</span>
+      <span class="sug" onclick="send(this.textContent)">Save snapshot</span>
     </div>
-    <div class="chat-input">
-      <input id="chat-in" type="text" placeholder="e.g. Add 10 shares of NVDA at $900..." onkeydown="if(event.key==='Enter')sendMsg()" />
-      <button id="send-btn" onclick="sendMsg()">Send</button>
+    <div class="input-row">
+      <input id="msg-input" type="text" placeholder="e.g. Add 10 NVDA shares at $900…" autocomplete="off" />
+      <button class="send-btn" id="send-btn" onclick="send()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-const fmt = (n) => n == null ? '—' : '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-const fmtPct = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
-let sectorChart = null;
+let sectorChart = null, historyChart = null;
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'history') loadHistory();
+  });
+});
+
+const fmt = n => n == null ? '—' : '$' + parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtPct = n => n == null ? '—' : (n >= 0 ? '+' : '') + parseFloat(n).toFixed(2) + '%';
+const cls = n => n >= 0 ? 'gain' : 'loss';
 
 async function loadPortfolio() {
   try {
-    const res = await fetch('/api/portfolio');
-    const data = await res.json();
-    const s = data.summary || {};
+    const data = await fetch('/api/portfolio').then(r => r.json());
+    document.getElementById('total-value').textContent = fmt(data.summary?.total_value);
+    document.getElementById('total-cost').textContent = fmt(data.summary?.total_cost);
+    const pnl = data.summary?.total_unrealised_gain;
+    const pnlEl = document.getElementById('pnl');
+    pnlEl.textContent = fmt(pnl);
+    pnlEl.className = 'card-value ' + (pnl >= 0 ? 'green' : 'red');
+    const pct = data.summary?.total_unrealised_gain_pct;
+    const pctEl = document.getElementById('pnl-pct');
+    pctEl.textContent = fmtPct(pct);
+    pctEl.className = 'card-value ' + (pct >= 0 ? 'green' : 'red');
 
-    document.getElementById('total-value').textContent = fmt(s.total_value);
-    document.getElementById('total-cost').textContent  = fmt(s.total_cost);
-
-    const pnlEl = document.getElementById('total-pnl');
-    pnlEl.textContent = fmt(s.total_unrealised_gain);
-    pnlEl.className = 'card-value ' + (s.total_unrealised_gain >= 0 ? 'up' : 'down');
-
-    const pctEl = document.getElementById('total-pnl-pct');
-    pctEl.textContent = fmtPct(s.total_unrealised_gain_pct);
-    pctEl.className = 'card-value ' + (s.total_unrealised_gain_pct >= 0 ? 'up' : 'down');
-
-    // Holdings table
     const tbody = document.getElementById('holdings-body');
     if (!data.holdings || data.holdings.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">No holdings yet. Ask the agent to add some!</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text3);text-align:center;padding:32px">No holdings yet — ask the agent to add some stocks.</td></tr>';
     } else {
-      tbody.innerHTML = data.holdings.map(h => `
-        <tr>
-          <td><strong>${h.ticker}</strong></td>
-          <td>${h.shares}</td>
-          <td>${fmt(h.avg_cost)}</td>
-          <td>${fmt(h.current_price)}</td>
-          <td>${fmt(h.market_value)}</td>
-          <td class="${h.unrealised_gain >= 0 ? 'up' : 'down'}">${fmt(h.unrealised_gain)}</td>
-          <td class="${h.unrealised_gain_pct >= 0 ? 'up' : 'down'}">${fmtPct(h.unrealised_gain_pct)}</td>
-        </tr>`).join('');
+      tbody.innerHTML = data.holdings.map(h => `<tr>
+        <td class="ticker-cell">${h.ticker}</td>
+        <td>${h.shares}</td>
+        <td>${fmt(h.avg_cost)}</td>
+        <td>${fmt(h.current_price)}</td>
+        <td>${fmt(h.current_value)}</td>
+        <td class="${cls(h.unrealised_gain)}">${fmt(h.unrealised_gain)}</td>
+        <td class="${cls(h.unrealised_gain_pct)}">${fmtPct(h.unrealised_gain_pct)}</td>
+      </tr>`).join('');
     }
 
-    // Sector chart
-    const sectors = data.allocation_by_sector || [];
+    const sectors = data.allocation_by_sector || {};
+    const labels = Object.keys(sectors);
+    const values = labels.map(l => sectors[l]);
+    const colors = ['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981','#06b6d4','#f97316'];
     if (sectorChart) sectorChart.destroy();
-    if (sectors.length > 0) {
-      const ctx = document.getElementById('sector-chart').getContext('2d');
-      sectorChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: sectors.map(s => s.sector),
-          datasets: [{ data: sectors.map(s => s.weight_pct), backgroundColor: ['#4f8ef7','#22c55e','#f59e0b','#a855f7','#ef4444','#06b6d4','#ec4899'] }]
-        },
-        options: { plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } } }
-      });
-    }
-
-    // Risks
-    const riskEl = document.getElementById('risk-list');
-    if (data.risks && data.risks.length > 0) {
-      riskEl.innerHTML = data.risks.map(r => `<span class="risk-badge">${r.message}</span>`).join('');
-    } else {
-      riskEl.textContent = 'No concentration risks detected.';
-    }
-  } catch(e) {
-    console.error('Portfolio load error', e);
-  }
-}
-
-async function sendMsg() {
-  const input = document.getElementById('chat-in');
-  const msg = input.value.trim();
-  if (!msg) return;
-  ask(msg);
-  input.value = '';
-}
-
-async function ask(msg) {
-  const messages = document.getElementById('messages');
-  const btn = document.getElementById('send-btn');
-
-  messages.innerHTML += `<div class="msg user">${msg}</div>`;
-  const loading = document.createElement('div');
-  loading.className = 'msg agent loading';
-  loading.textContent = 'Thinking...';
-  messages.appendChild(loading);
-  messages.scrollTop = messages.scrollHeight;
-
-  btn.disabled = true;
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ message: msg })
+    sectorChart = new Chart(document.getElementById('sector-chart'), {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+      options: {
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 12, family: 'Inter' }, padding: 14, boxWidth: 12 } },
+          tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed.toFixed(1)}%` } }
+        }
+      }
     });
+
+    const risksEl = document.getElementById('risks-container');
+    risksEl.innerHTML = (!data.risks || data.risks.length === 0)
+      ? '<span class="risk-ok">✓ No concentration risks detected</span>'
+      : data.risks.map(r => `<span class="risk-badge">⚠ ${r}</span>`).join('');
+  } catch(e) { console.error('Portfolio load failed', e); }
+}
+
+async function loadHistory() {
+  try {
+    const data = await fetch('/api/history').then(r => r.json());
+    const canvas = document.getElementById('history-chart');
+    const empty = document.getElementById('history-empty');
+    if (!data || data.length === 0) {
+      canvas.style.display = 'none'; empty.style.display = 'block'; return;
+    }
+    canvas.style.display = 'block'; empty.style.display = 'none';
+    if (historyChart) historyChart.destroy();
+    const labels = data.map(s => (s.snapshot_date || '').slice(0,10));
+    const values = data.map(s => s.total_value);
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,200);
+    grad.addColorStop(0,'rgba(59,130,246,0.3)'); grad.addColorStop(1,'rgba(59,130,246,0)');
+    historyChart = new Chart(canvas, {
+      type: 'line',
+      data: { labels, datasets: [{ data: values, borderColor: '#3b82f6', backgroundColor: grad, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#3b82f6', pointBorderColor: '#070b14', pointBorderWidth: 2 }] },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + c.parsed.y.toLocaleString('en-US',{minimumFractionDigits:2}) } } },
+        scales: {
+          x: { ticks: { color: '#475569', font: { size: 11 } }, grid: { color: '#1e2d45' } },
+          y: { ticks: { color: '#475569', font: { size: 11 }, callback: v => '$'+v.toLocaleString() }, grid: { color: '#1e2d45' } }
+        }
+      }
+    });
+  } catch(e) { console.error('History load failed', e); }
+}
+
+const input = document.getElementById('msg-input');
+const sendBtn = document.getElementById('send-btn');
+const messagesEl = document.getElementById('messages');
+input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+function addMsg(text, type) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = type === 'agent' ? marked.parse(text) : text.replace(/</g,'&lt;');
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+async function send(text) {
+  const message = text || input.value.trim();
+  if (!message) return;
+  input.value = ''; sendBtn.disabled = true;
+  addMsg(message, 'user');
+  const typing = addTyping();
+  try {
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
     const data = await res.json();
-    loading.className = 'msg agent';
-    loading.textContent = data.reply || data.error || 'No response.';
-    await loadPortfolio();
+    typing.remove();
+    if (data.error) addMsg(data.error, 'error');
+    else { addMsg(data.reply, 'agent'); loadPortfolio(); }
   } catch(e) {
-    loading.className = 'msg agent';
-    loading.textContent = 'Error reaching agent. Is the server running?';
-  } finally {
-    btn.disabled = false;
-    messages.scrollTop = messages.scrollHeight;
+    typing.remove();
+    addMsg('Connection error — is the server running?', 'error');
   }
+  sendBtn.disabled = false;
+  input.focus();
 }
 
 loadPortfolio();
-setInterval(loadPortfolio, 60000); // refresh every minute
 </script>
 </body>
 </html>
