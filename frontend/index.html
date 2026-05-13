@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Portfolio Agent</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #4f8ef7;
+      --green: #22c55e;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 600; }
+    header span { color: var(--accent); font-size: 1.4rem; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 0;
+      height: calc(100vh - 57px);
+    }
+
+    /* ── Left panel ── */
+    .main { overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+    .card-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card-value { font-size: 1.5rem; font-weight: 700; }
+    .card-value.up   { color: var(--green); }
+    .card-value.down { color: var(--red); }
+
+    .section-title { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { text-align: left; color: var(--muted); font-weight: 500; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
+    td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .up   { color: var(--green); }
+    .down { color: var(--red); }
+
+    .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; }
+    canvas { max-height: 220px; }
+
+    .risk-badge {
+      display: inline-block;
+      background: rgba(239,68,68,0.15);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 0.375rem;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.78rem;
+      margin: 0.2rem;
+    }
+
+    /* ── Right chat panel ── */
+    .chat-panel {
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+    }
+    .chat-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; }
+    .messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .msg { max-width: 90%; border-radius: 0.75rem; padding: 0.65rem 0.9rem; font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .msg.user  { align-self: flex-end; background: var(--accent); color: #fff; }
+    .msg.agent { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); }
+    .msg.agent.loading { color: var(--muted); font-style: italic; }
+
+    .chat-input { display: flex; gap: 0.5rem; padding: 0.75rem; border-top: 1px solid var(--border); }
+    .chat-input input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      font-size: 0.875rem;
+      outline: none;
+    }
+    .chat-input input:focus { border-color: var(--accent); }
+    .chat-input button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .chat-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .suggestions { padding: 0 0.75rem 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .suggestion {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .suggestion:hover { border-color: var(--accent); color: var(--text); }
+  </style>
+</head>
+<body>
+<header>
+  <span>📈</span>
+  <h1>Smart Portfolio Agent</h1>
+</header>
+
+<div class="layout">
+  <!-- Dashboard -->
+  <div class="main">
+    <!-- Summary cards -->
+    <div class="cards" id="summary-cards">
+      <div class="card"><div class="card-label">Total Value</div><div class="card-value" id="total-value">—</div></div>
+      <div class="card"><div class="card-label">Total Cost</div><div class="card-value" id="total-cost">—</div></div>
+      <div class="card"><div class="card-label">Unrealised P&L</div><div class="card-value" id="total-pnl">—</div></div>
+      <div class="card"><div class="card-label">P&L %</div><div class="card-value" id="total-pnl-pct">—</div></div>
+    </div>
+
+    <!-- Holdings table -->
+    <div class="chart-wrap">
+      <div class="section-title">Holdings</div>
+      <table>
+        <thead><tr><th>Ticker</th><th>Shares</th><th>Avg Cost</th><th>Price</th><th>Value</th><th>P&L</th><th>P&L %</th></tr></thead>
+        <tbody id="holdings-body"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- Sector chart + risk warnings -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="chart-wrap">
+        <div class="section-title">Sector Allocation</div>
+        <canvas id="sector-chart"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="section-title">Concentration Risks</div>
+        <div id="risk-list" style="color:var(--muted);font-size:0.85rem">No risks detected.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-panel">
+    <div class="chat-header">Ask your portfolio agent</div>
+    <div class="messages" id="messages">
+      <div class="msg agent">Hi! I'm your Smart Portfolio Agent. Ask me anything about your holdings, risk, or market data.</div>
+    </div>
+    <div class="suggestions">
+      <div class="suggestion" onclick="ask('Analyse my full portfolio')">Analyse my portfolio</div>
+      <div class="suggestion" onclick="ask('What are my biggest risks?')">Biggest risks</div>
+      <div class="suggestion" onclick="ask('Get price of AAPL')">AAPL price</div>
+      <div class="suggestion" onclick="ask('Show my watchlist')">Watchlist</div>
+    </div>
+    <div class="chat-input">
+      <input id="chat-in" type="text" placeholder="e.g. Add 10 shares of NVDA at $900..." onkeydown="if(event.key==='Enter')sendMsg()" />
+      <button id="send-btn" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmt = (n) => n == null ? '—' : '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtPct = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+let sectorChart = null;
+
+async function loadPortfolio() {
+  try {
+    const res = await fetch('/api/portfolio');
+    const data = await res.json();
+    const s = data.summary || {};
+
+    document.getElementById('total-value').textContent = fmt(s.total_value);
+    document.getElementById('total-cost').textContent  = fmt(s.total_cost);
+
+    const pnlEl = document.getElementById('total-pnl');
+    pnlEl.textContent = fmt(s.total_unrealised_gain);
+    pnlEl.className = 'card-value ' + (s.total_unrealised_gain >= 0 ? 'up' : 'down');
+
+    const pctEl = document.getElementById('total-pnl-pct');
+    pctEl.textContent = fmtPct(s.total_unrealised_gain_pct);
+    pctEl.className = 'card-value ' + (s.total_unrealised_gain_pct >= 0 ? 'up' : 'down');
+
+    // Holdings table
+    const tbody = document.getElementById('holdings-body');
+    if (!data.holdings || data.holdings.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">No holdings yet. Ask the agent to add some!</td></tr>';
+    } else {
+      tbody.innerHTML = data.holdings.map(h => `
+        <tr>
+          <td><strong>${h.ticker}</strong></td>
+          <td>${h.shares}</td>
+          <td>${fmt(h.avg_cost)}</td>
+          <td>${fmt(h.current_price)}</td>
+          <td>${fmt(h.market_value)}</td>
+          <td class="${h.unrealised_gain >= 0 ? 'up' : 'down'}">${fmt(h.unrealised_gain)}</td>
+          <td class="${h.unrealised_gain_pct >= 0 ? 'up' : 'down'}">${fmtPct(h.unrealised_gain_pct)}</td>
+        </tr>`).join('');
+    }
+
+    // Sector chart
+    const sectors = data.allocation_by_sector || [];
+    if (sectorChart) sectorChart.destroy();
+    if (sectors.length > 0) {
+      const ctx = document.getElementById('sector-chart').getContext('2d');
+      sectorChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: sectors.map(s => s.sector),
+          datasets: [{ data: sectors.map(s => s.weight_pct), backgroundColor: ['#4f8ef7','#22c55e','#f59e0b','#a855f7','#ef4444','#06b6d4','#ec4899'] }]
+        },
+        options: { plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } } }
+      });
+    }
+
+    // Risks
+    const riskEl = document.getElementById('risk-list');
+    if (data.risks && data.risks.length > 0) {
+      riskEl.innerHTML = data.risks.map(r => `<span class="risk-badge">${r.message}</span>`).join('');
+    } else {
+      riskEl.textContent = 'No concentration risks detected.';
+    }
+  } catch(e) {
+    console.error('Portfolio load error', e);
+  }
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chat-in');
+  const msg = input.value.trim();
+  if (!msg) return;
+  ask(msg);
+  input.value = '';
+}
+
+async function ask(msg) {
+  const messages = document.getElementById('messages');
+  const btn = document.getElementById('send-btn');
+
+  messages.innerHTML += `<div class="msg user">${msg}</div>`;
+  const loading = document.createElement('div');
+  loading.className = 'msg agent loading';
+  loading.textContent = 'Thinking...';
+  messages.appendChild(loading);
+  messages.scrollTop = messages.scrollHeight;
+
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ message: msg })
+    });
+    const data = await res.json();
+    loading.className = 'msg agent';
+    loading.textContent = data.reply || data.error || 'No response.';
+    await loadPortfolio();
+  } catch(e) {
+    loading.className = 'msg agent';
+    loading.textContent = 'Error reaching agent. Is the server running?';
+  } finally {
+    btn.disabled = false;
+    messages.scrollTop = messages.scrollHeight;
+  }
+}
+
+loadPortfolio();
+setInterval(loadPortfolio, 60000); // refresh every minute
+</script>
+</body>
+</html>
