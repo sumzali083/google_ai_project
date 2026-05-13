@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": ["-y", "mongodb-mcp-server"],
+      "env": {
+        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://user:password@cluster.example.mongodb.net/portfolio_agent?retryWrites=true&w=majority",
+        "MDB_MCP_DISABLED_TOOLS": "drop-database,drop-collection,delete-many"
+      }
+    }
+  }
+}
