@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(python -c \"import google.adk; print\\(google.adk.__version__\\); from google.adk.agents import LlmAgent; from google.adk.runners import Runner; from google.adk.sessions import InMemorySessionService; from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters; print\\('All ADK imports OK'\\)\" 2>&1)",
-      "PowerShell(python -c \"from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset; print\\([m for m in dir\\(MCPToolset\\) if not m.startswith\\('_'\\)]\\)\" 2>&1)"
-    ]
-  }
-}

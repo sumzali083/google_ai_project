@@ -141,7 +141,7 @@ nav {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 410px;
+  grid-template-columns: minmax(0, 1fr) 420px;
   flex: 1;
   min-height: 0;
 }
@@ -330,8 +330,11 @@ tbody tr:hover td { background: var(--surface2); }
   font-size: 13px;
 }
 
-.bottom-row { display: grid; grid-template-columns: 220px 1fr; gap: 14px; }
+.bottom-row { display: grid; grid-template-columns: 200px 1fr 200px; gap: 14px; }
 .chart-wrap { display: flex; align-items: center; justify-content: center; padding: 18px 16px; }
+.hist-wrap { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+.hist-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.hist-canvas-wrap { position: relative; height: 148px; }
 .risk-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 7px; }
 
 .risk-item {
@@ -530,6 +533,7 @@ tbody tr:hover td { background: var(--surface2); }
   .nav-stack { gap: 6px; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .bottom-row { grid-template-columns: 1fr; }
+  .hist-canvas-wrap { height: 120px; }
   .activity-list { grid-template-columns: 1fr; }
   .dash { padding: 14px; }
   table { min-width: 720px; }
@@ -584,7 +588,7 @@ tbody tr:hover td { background: var(--surface2); }
 
     <div class="insight-row">
       <div class="stat compact">
-        <div class="stat-label">Portfolio Health</div>
+        <div class="stat-label">Diversification Score</div>
         <div class="health-wrap">
           <div class="health-score" id="health-ring"><span id="health-score">--</span></div>
           <div class="health-copy" id="health-copy">Waiting for live holdings.</div>
@@ -636,6 +640,21 @@ tbody tr:hover td { background: var(--surface2); }
         </div>
         <div class="chart-wrap">
           <canvas id="donut" width="180" height="180"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-title">Performance</span>
+          <span class="card-head-meta" id="hist-range">30d</span>
+        </div>
+        <div class="hist-wrap">
+          <div class="hist-meta">
+            <span id="hist-start">—</span>
+            <span id="hist-end">—</span>
+          </div>
+          <div class="hist-canvas-wrap">
+            <canvas id="hist"></canvas>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -719,28 +738,33 @@ function cleanMarkdown(value) {
   });
 }
 
-function updateHealth(summary, risks) {
-  const total = Number(summary.total_value || 0);
-  const ret = Number(summary.total_unrealised_gain_pct || 0);
-  const riskPenalty = Math.min((risks || []).length * 22, 55);
-  const returnBoost = Math.max(Math.min(ret, 12), -12);
-  const score = total <= 0 ? null : Math.max(0, Math.min(100, Math.round(72 - riskPenalty + returnBoost)));
+function updateHealth(sectors, risks) {
   const scoreEl = $('health-score');
-  const ring = $('health-ring');
-  const copy = $('health-copy');
+  const ring    = $('health-ring');
+  const copy    = $('health-copy');
 
-  if (score == null) {
+  if (!sectors || sectors.length === 0) {
     scoreEl.textContent = '--';
     ring.style.setProperty('--health-deg', '0deg');
-    copy.textContent = 'Add holdings to unlock risk and return scoring.';
+    copy.textContent = 'Add holdings to unlock diversification scoring.';
     return;
   }
 
+  // Herfindahl-Hirschman Index: sum of squared sector weights
+  const hhi = sectors.reduce((sum, s) => sum + Math.pow(s.weight_pct / 100, 2), 0);
+  // Diversification score: 0 (single sector) → 100 (perfectly spread)
+  const base = Math.round((1 - hhi) * 100);
+  const penalty = Math.min((risks || []).length * 12, 36);
+  const score = Math.max(0, Math.min(100, base - penalty));
+
   scoreEl.textContent = score;
   ring.style.setProperty('--health-deg', `${score * 3.6}deg`);
-  if ((risks || []).length) copy.textContent = `${risks.length} concentration flag${risks.length > 1 ? 's' : ''}. Diversification is the next unlock.`;
-  else if (ret < 0) copy.textContent = 'Diversified, but currently down. Watch drawdown and position size.';
-  else copy.textContent = 'No concentration flags. Keep monitoring sectors and benchmark drift.';
+
+  const nSectors = sectors.length;
+  if (score >= 80) copy.textContent = `Well diversified across ${nSectors} sectors. HHI: ${hhi.toFixed(2)}.`;
+  else if (score >= 60) copy.textContent = `Moderate spread across ${nSectors} sectors. HHI: ${hhi.toFixed(2)}.`;
+  else if ((risks || []).length) copy.textContent = `${risks.length} concentration flag${risks.length > 1 ? 's' : ''}. Consider spreading across more sectors.`;
+  else copy.textContent = `Concentrated in ${nSectors} sector${nSectors > 1 ? 's' : ''}. Diversify to improve score.`;
 }
 
 async function loadWatchlistMini() {
@@ -835,11 +859,12 @@ async function loadPortfolio() {
       ? '<span class="risk-ok">OK: No concentration risks detected</span>'
       : risks.map(r => `<div class="risk-item">Warning: ${escapeHtml(r.message || r)}</div>`).join('');
 
-    updateHealth(s, risks);
+    updateHealth(sectors, risks);
     $('agent-step-ai').textContent = 'Ready for risk, benchmark, and watchlist questions.';
     $('agent-step-db').textContent = `${(d.holdings || []).length} holding${(d.holdings || []).length === 1 ? '' : 's'} loaded from MongoDB.`;
     $('agent-step-market').textContent = `Prices refreshed at ${now()}.`;
     loadWatchlistMini();
+    loadHistory();
   } catch (e) {
     console.error('Portfolio load error:', e);
   }
@@ -875,6 +900,11 @@ async function send(txt) {
   sbtn.disabled = true;
   bubble(escapeHtml(msg), 'me');
   const typing = showTyping();
+
+  $('agent-step-ai').textContent = 'Routing to Gemini 2.5…';
+  $('agent-step-db').textContent = 'Querying MongoDB holdings…';
+  $('agent-step-market').textContent = 'Fetching live prices…';
+
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
@@ -883,17 +913,111 @@ async function send(txt) {
     });
     const data = await res.json();
     typing.remove();
-    if (data.error) bubble(escapeHtml(data.error), 'err');
-    else {
+    if (data.error) {
+      bubble(escapeHtml(data.error), 'err');
+      $('agent-step-ai').textContent = 'Error — check server logs.';
+      $('agent-step-db').textContent = 'DB query may have failed.';
+      $('agent-step-market').textContent = 'Price fetch status unknown.';
+    } else {
       bubble(cleanMarkdown(data.reply), 'ai');
+      $('agent-step-ai').textContent = `Last query: "${msg.slice(0, 40)}${msg.length > 40 ? '…' : ''}" at ${now()}`;
       loadPortfolio();
     }
   } catch (e) {
     typing.remove();
-    bubble('Connection error - is the server running?', 'err');
+    bubble('Connection error — is the server running?', 'err');
+    $('agent-step-ai').textContent = 'Connection failed.';
   }
   sbtn.disabled = false;
   inp.focus();
+}
+
+let histChart = null;
+
+async function loadHistory() {
+  try {
+    const snaps = await fetch('/api/history').then(r => r.json());
+    if (!Array.isArray(snaps) || snaps.length < 2) return;
+
+    const labels  = snaps.map(s => {
+      const d = new Date(s.snapshot_date);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    const values   = snaps.map(s => s.total_value);
+    const costs    = snaps.map(s => s.total_cost);
+    const accent   = getComputedStyle(html).getPropertyValue('--accent').trim();
+    const muted    = getComputedStyle(html).getPropertyValue('--muted').trim();
+    const surface  = getComputedStyle(html).getPropertyValue('--surface').trim();
+    const text2    = getComputedStyle(html).getPropertyValue('--text2').trim();
+
+    $('hist-start').textContent = '$' + Number(values[0]).toLocaleString('en-US', {maximumFractionDigits:0});
+    $('hist-end').textContent   = '$' + Number(values[values.length-1]).toLocaleString('en-US', {maximumFractionDigits:0});
+
+    if (histChart) histChart.destroy();
+    histChart = new Chart($('hist'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Portfolio Value',
+            data: values,
+            borderColor: accent,
+            backgroundColor: accent + '18',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+          },
+          {
+            label: 'Cost Basis',
+            data: costs,
+            borderColor: muted,
+            borderWidth: 1.5,
+            borderDash: [4, 4],
+            fill: false,
+            tension: 0,
+            pointRadius: 0,
+            pointHoverRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: surface,
+            titleColor: text2,
+            bodyColor: text2,
+            borderColor: muted,
+            borderWidth: 1,
+            callbacks: {
+              label: c => ` ${c.dataset.label}: $${Number(c.parsed.y).toLocaleString('en-US', {maximumFractionDigits:0})}`,
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: muted, font: { size: 10 }, maxTicksLimit: 6 },
+            border: { display: false },
+          },
+          y: {
+            grid: { color: getComputedStyle(html).getPropertyValue('--border').trim() },
+            ticks: {
+              color: muted, font: { size: 10 },
+              callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v),
+            },
+            border: { display: false },
+          }
+        }
+      }
+    });
+  } catch (e) { console.error('History load error:', e); }
 }
 
 loadPortfolio();
