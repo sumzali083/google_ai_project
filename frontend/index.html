@@ -770,7 +770,7 @@ tbody tr:hover td { background: var(--surface2); }
       <div class="card table-card">
         <div class="card-head">
           <span class="card-head-title">Watchlist</span>
-          <span class="card-head-meta" id="wl-count">—</span>
+          <span class="card-head-meta" id="wl-count">--</span>
         </div>
         <table>
           <thead>
@@ -788,7 +788,7 @@ tbody tr:hover td { background: var(--surface2); }
           </tbody>
         </table>
       </div>
-      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" — price is captured automatically so you can track what you missed.</p>
+      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" - price is captured automatically so you can track what you missed.</p>
     </div>
 
     <!-- ── Insights ── -->
@@ -796,27 +796,27 @@ tbody tr:hover td { background: var(--surface2); }
       <div class="ins-grid">
         <div class="ins-card">
           <div class="ins-label">Most Invested</div>
-          <div class="ins-ticker" id="ins-top-ticker">—</div>
-          <div class="ins-val" id="ins-top-val">—</div>
-          <div class="ins-sub" id="ins-top-sub">—</div>
+          <div class="ins-ticker" id="ins-top-ticker">--</div>
+          <div class="ins-val" id="ins-top-val">--</div>
+          <div class="ins-sub" id="ins-top-sub">--</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Best Performer</div>
-          <div class="ins-ticker" id="ins-best-ticker">—</div>
-          <div class="ins-val" id="ins-best-val">—</div>
-          <div class="ins-sub" id="ins-best-sub">—</div>
+          <div class="ins-ticker" id="ins-best-ticker">--</div>
+          <div class="ins-val" id="ins-best-val">--</div>
+          <div class="ins-sub" id="ins-best-sub">--</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Needs Attention</div>
-          <div class="ins-ticker" id="ins-worst-ticker">—</div>
-          <div class="ins-val" id="ins-worst-val">—</div>
-          <div class="ins-sub" id="ins-worst-sub">—</div>
+          <div class="ins-ticker" id="ins-worst-ticker">--</div>
+          <div class="ins-val" id="ins-worst-val">--</div>
+          <div class="ins-sub" id="ins-worst-sub">--</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Top Sector</div>
-          <div class="ins-ticker" id="ins-sector-name">—</div>
-          <div class="ins-val" id="ins-sector-val">—</div>
-          <div class="ins-sub" id="ins-sector-sub">—</div>
+          <div class="ins-ticker" id="ins-sector-name">--</div>
+          <div class="ins-val" id="ins-sector-val">--</div>
+          <div class="ins-sub" id="ins-sector-sub">--</div>
         </div>
       </div>
 
@@ -879,7 +879,7 @@ tbody tr:hover td { background: var(--surface2); }
           <span class="card-head-meta">Your personal investment policy</span>
         </div>
         <div id="rules-list" style="padding:12px 16px;display:flex;flex-direction:column;gap:7px">
-          <span style="color:var(--muted);font-size:13px">Loading rules…</span>
+          <span style="color:var(--muted);font-size:13px">Loading rules...</span>
         </div>
         <div style="padding:10px 16px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <select id="rule-type" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12.5px;outline:none">
@@ -891,7 +891,7 @@ tbody tr:hover td { background: var(--surface2); }
           <input id="rule-param2" type="number" placeholder="40" min="1" max="100" style="width:70px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12.5px;outline:none" />
           <button class="gen-btn" onclick="addRule()">Add Rule</button>
         </div>
-        <div style="padding:0 16px 12px;font-size:11px;color:var(--muted);font-style:italic">Or tell the agent: "Cap Technology at 40%" — it will create the rule automatically.</div>
+        <div style="padding:0 16px 12px;font-size:11px;color:var(--muted);font-style:italic">Or tell the agent: "Cap Technology at 40%" - it will create the rule automatically.</div>
       </div>
     </div>
   </div>
@@ -1294,12 +1294,12 @@ async function generateResearchIdeas() {
 
 async function loadWatchlistFull() {
   const tbody = $('wl-body');
-  tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Loading...</td></tr>';
   try {
     const items = await fetch('/api/watchlist').then(r => r.json());
     $('wl-count').textContent = items.length + ' stock' + (items.length === 1 ? '' : 's');
     if (!Array.isArray(items) || items.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Your watchlist is empty — ask the agent to add tickers.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Your watchlist is empty - ask the agent to add tickers.</td></tr>';
       return;
     }
     tbody.innerHTML = items.map(item => {
@@ -1307,15 +1307,15 @@ async function loadWatchlistFull() {
       const sinceAdd = item.since_add_pct;
       const sinceEl  = sinceAdd != null
         ? `<span class="${sinceAdd >= 0 ? 'pos' : 'neg'}">${pct(sinceAdd)}</span>`
-        : '<span style="color:var(--muted)">—</span>';
+        : '<span style="color:var(--muted)">--</span>';
       const t = escapeHtml(item.ticker);
       return `<tr>
         <td><span class="ticker-badge">${t}</span></td>
-        <td>${item.price ? fmt(item.price) : '—'}</td>
-        <td class="${cls(chg)}">${chg !== 0 ? pct(chg) : '—'}</td>
+        <td>${item.price ? fmt(item.price) : '--'}</td>
+        <td class="${cls(chg)}">${chg !== 0 ? pct(chg) : '--'}</td>
         <td>${sinceEl}</td>
-        <td style="text-align:left;color:var(--text2);font-family:'Inter',sans-serif;font-size:12.5px">${escapeHtml(item.note || '—')}</td>
-        <td style="text-align:right"><button class="research-btn" onclick="send('Research ${t} — should I consider adding it given my current holdings?')">Ask AI</button></td>
+        <td style="text-align:left;color:var(--text2);font-family:'Inter',sans-serif;font-size:12.5px">${escapeHtml(item.note || '--')}</td>
+        <td style="text-align:right"><button class="research-btn" onclick="send('Research ${t} - should I consider adding it given my current holdings?')">Ask AI</button></td>
       </tr>`;
     }).join('');
   } catch (e) {
@@ -1336,7 +1336,7 @@ async function runPreview() {
     return;
   }
   btn.disabled = true;
-  result.innerHTML = '<span style="color:var(--muted)">Calculating…</span>';
+  result.innerHTML = '<span style="color:var(--muted)">Calculating...</span>';
 
   try {
     const d = await fetch('/api/preview-trade', {
@@ -1370,14 +1370,14 @@ async function runPreview() {
         </div>
         <div>
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Diversification Score</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${d.current_score} → ${d.new_score} <span style="color:${deltaColor};font-size:12px">(${deltaStr})</span></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${d.current_score} to ${d.new_score} <span style="color:${deltaColor};font-size:12px">(${deltaStr})</span></div>
         </div>
       </div>
       ${breached.length
         ? `<div style="display:flex;flex-direction:column;gap:6px">${breached.map(r => `<div class="risk-item">⚠ ${escapeHtml(r.label)}: ${escapeHtml(r.detail)}</div>`).join('')}</div>`
         : '<div style="color:var(--ok-tx);font-size:12.5px;padding:4px 0">✓ No rules would be breached.</div>'}`;
   } catch (e) {
-    result.innerHTML = '<span style="color:var(--risk-tx)">Preview failed — check server.</span>';
+    result.innerHTML = '<span style="color:var(--risk-tx)">Preview failed - check server.</span>';
   }
   btn.disabled = false;
 }
