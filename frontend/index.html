@@ -834,6 +834,20 @@ tbody tr:hover td { background: var(--surface2); }
         </div>
       </div>
 
+      <!-- Research ideas -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-title">Research Ideas</span>
+          <span class="card-head-meta" id="ideas-time"></span>
+        </div>
+        <div class="ai-sum-wrap" id="ideas-wrap">
+          <div class="ai-sum-idle">
+            <span>Generate educational watchlist ideas based on your portfolio gaps.</span>
+            <button class="gen-btn" id="ideas-btn" onclick="generateResearchIdeas()">Generate Ideas</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Pre-trade preview -->
       <div class="card">
         <div class="card-head">
@@ -1151,6 +1165,7 @@ async function send(txt) {
 let histChart = null;
 let _portfolio = null;  // cached portfolio response
 let _summaryFetched = false;
+let _ideasFetched = false;
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
@@ -1162,7 +1177,6 @@ function switchTab(name, btn) {
   if (name === 'watchlist') loadWatchlistFull();
   if (name === 'insights') {
     if (_portfolio) populateInsights(_portfolio);
-    if (!_summaryFetched) generateSummary();
     loadRules();
   }
 }
@@ -1240,6 +1254,44 @@ async function generateSummary() {
 }
 
 // ── Watchlist full tab ────────────────────────────────────────────────────────
+async function generateResearchIdeas() {
+  const btn = $('ideas-btn');
+  const wrap = $('ideas-wrap');
+  if (btn) btn.disabled = true;
+  _ideasFetched = true;
+
+  wrap.innerHTML = `<div class="ai-sum-loading">
+    <div class="typing"><span></span><span></span><span></span></div>
+    Gemini is generating research ideas...
+  </div>`;
+
+  const prompt = `Generate educational research ideas for my portfolio. Do not tell me to buy or sell anything. Use my current holdings, sector allocation, concentration risks, and watchlist. Return 4-6 watchlist candidates or asset/sector ideas to research. For each idea include: ticker or sector, why it may help, which risk it addresses, and one thing I should check before adding it. Prefer diversification and risk-management logic over hype. Include broad ETFs when appropriate.`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: prompt }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      wrap.innerHTML = `<div class="ai-sum-idle"><span style="color:var(--risk-tx)">${escapeHtml(data.error)}</span><button class="gen-btn" onclick="generateResearchIdeas()">Retry</button></div>`;
+      _ideasFetched = false;
+      return;
+    }
+    $('ideas-time').textContent = 'Generated at ' + now();
+    wrap.innerHTML = `<div class="ai-sum-content">${cleanMarkdown(data.reply)}</div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="gen-btn" onclick="_ideasFetched=false;generateResearchIdeas()">Refresh Ideas</button>
+        <button class="gen-btn" onclick="send('Add the strongest research ideas from this analysis to my watchlist with short notes')">Ask AI to Save Ideas</button>
+      </div>`;
+    loadPortfolio();
+  } catch (e) {
+    wrap.innerHTML = `<div class="ai-sum-idle"><span>Connection error.</span><button class="gen-btn" onclick="generateResearchIdeas()">Retry</button></div>`;
+    _ideasFetched = false;
+  }
+}
+
 async function loadWatchlistFull() {
   const tbody = $('wl-body');
   tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Loading…</td></tr>';
