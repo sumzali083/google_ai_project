@@ -20,6 +20,7 @@ USER_ID = os.environ.get("DEFAULT_USER_ID", "demo_user")
 MONGODB_URI = os.environ.get("MONGODB_URI", "")
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "project-39a25ac1-734b-42d5-996")
 LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+NPX_COMMAND = "npx.cmd" if os.name == "nt" else "npx"
 
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "1"
 os.environ["GOOGLE_CLOUD_PROJECT"] = PROJECT_ID
@@ -153,8 +154,9 @@ async def _init():
 
     mongo_mcp = MCPToolset(
         connection_params=StdioServerParameters(
-            command="mongodb-mcp-server",
-            args=["--connectionString", MONGODB_URI],
+            command=NPX_COMMAND,
+            args=["-y", "mongodb-mcp-server"],
+            env={**os.environ, "MDB_MCP_CONNECTION_STRING": MONGODB_URI},
         ),
         tool_filter=["find", "findOne", "insertOne", "updateOne", "deleteOne",
                      "listCollections", "listDatabases", "createIndex"],
