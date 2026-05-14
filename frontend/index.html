@@ -770,24 +770,25 @@ tbody tr:hover td { background: var(--surface2); }
       <div class="card table-card">
         <div class="card-head">
           <span class="card-head-title">Watchlist</span>
-          <span class="card-head-meta" id="wl-count">--</span>
+          <span class="card-head-meta" id="wl-count">—</span>
         </div>
         <table>
           <thead>
             <tr>
               <th style="text-align:left">Ticker</th>
               <th>Price</th>
-              <th>Change</th>
-              <th style="text-align:left; min-width:120px">Note</th>
+              <th>Today</th>
+              <th>Since Added</th>
+              <th style="text-align:left">Note</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="wl-body">
-            <tr><td colspan="5" class="empty-msg">Loading watchlist...</td></tr>
+            <tr><td colspan="6" class="empty-msg">Loading watchlist...</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" - it will appear here instantly.</p>
+      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" — price is captured automatically so you can track what you missed.</p>
     </div>
 
     <!-- ── Insights ── -->
@@ -795,30 +796,31 @@ tbody tr:hover td { background: var(--surface2); }
       <div class="ins-grid">
         <div class="ins-card">
           <div class="ins-label">Most Invested</div>
-          <div class="ins-ticker" id="ins-top-ticker">--</div>
-          <div class="ins-val" id="ins-top-val">--</div>
-          <div class="ins-sub" id="ins-top-sub">--</div>
+          <div class="ins-ticker" id="ins-top-ticker">—</div>
+          <div class="ins-val" id="ins-top-val">—</div>
+          <div class="ins-sub" id="ins-top-sub">—</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Best Performer</div>
-          <div class="ins-ticker" id="ins-best-ticker">--</div>
-          <div class="ins-val pos" id="ins-best-val">--</div>
-          <div class="ins-sub" id="ins-best-sub">--</div>
+          <div class="ins-ticker" id="ins-best-ticker">—</div>
+          <div class="ins-val" id="ins-best-val">—</div>
+          <div class="ins-sub" id="ins-best-sub">—</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Needs Attention</div>
-          <div class="ins-ticker" id="ins-worst-ticker">--</div>
-          <div class="ins-val" id="ins-worst-val">--</div>
-          <div class="ins-sub" id="ins-worst-sub">--</div>
+          <div class="ins-ticker" id="ins-worst-ticker">—</div>
+          <div class="ins-val" id="ins-worst-val">—</div>
+          <div class="ins-sub" id="ins-worst-sub">—</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Top Sector</div>
-          <div class="ins-ticker" id="ins-sector-name">--</div>
-          <div class="ins-val" id="ins-sector-val">--</div>
-          <div class="ins-sub" id="ins-sector-sub">--</div>
+          <div class="ins-ticker" id="ins-sector-name">—</div>
+          <div class="ins-val" id="ins-sector-val">—</div>
+          <div class="ins-sub" id="ins-sector-sub">—</div>
         </div>
       </div>
 
+      <!-- AI Analysis -->
       <div class="card">
         <div class="card-head">
           <span class="card-head-title">AI Portfolio Analysis</span>
@@ -830,6 +832,52 @@ tbody tr:hover td { background: var(--surface2); }
             <button class="gen-btn" id="gen-btn" onclick="generateSummary()">Generate Analysis</button>
           </div>
         </div>
+      </div>
+
+      <!-- Pre-trade preview -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-title">Pre-Trade Preview</span>
+          <span class="card-head-meta">See consequences before you buy</span>
+        </div>
+        <div style="padding:14px 18px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; border-bottom:1px solid var(--border)">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Ticker</label>
+            <input id="pt-ticker" type="text" placeholder="AAPL" style="width:80px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Shares</label>
+            <input id="pt-shares" type="number" placeholder="10" min="0.01" step="0.01" style="width:80px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)">Price ($)</label>
+            <input id="pt-price" type="number" placeholder="180.00" min="0.01" step="0.01" style="width:100px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none" />
+          </div>
+          <button class="gen-btn" id="pt-btn" onclick="runPreview()" style="height:34px">Preview Trade</button>
+        </div>
+        <div id="pt-result" style="padding:14px 18px;color:var(--muted);font-size:13px">Enter a ticker, share count, and price above.</div>
+      </div>
+
+      <!-- Portfolio Rules -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-title">Portfolio Rules</span>
+          <span class="card-head-meta">Your personal investment policy</span>
+        </div>
+        <div id="rules-list" style="padding:12px 16px;display:flex;flex-direction:column;gap:7px">
+          <span style="color:var(--muted);font-size:13px">Loading rules…</span>
+        </div>
+        <div style="padding:10px 16px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="rule-type" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12.5px;outline:none">
+            <option value="sector_max">Sector cap</option>
+            <option value="position_max">Position cap</option>
+            <option value="min_sectors">Min sectors</option>
+          </select>
+          <input id="rule-param1" type="text" placeholder="Technology" style="width:120px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-size:12.5px;outline:none" />
+          <input id="rule-param2" type="number" placeholder="40" min="1" max="100" style="width:70px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12.5px;outline:none" />
+          <button class="gen-btn" onclick="addRule()">Add Rule</button>
+        </div>
+        <div style="padding:0 16px 12px;font-size:11px;color:var(--muted);font-style:italic">Or tell the agent: "Cap Technology at 40%" — it will create the rule automatically.</div>
       </div>
     </div>
   </div>
@@ -1114,6 +1162,8 @@ function switchTab(name, btn) {
   if (name === 'watchlist') loadWatchlistFull();
   if (name === 'insights') {
     if (_portfolio) populateInsights(_portfolio);
+    if (!_summaryFetched) generateSummary();
+    loadRules();
   }
 }
 
@@ -1192,27 +1242,152 @@ async function generateSummary() {
 // ── Watchlist full tab ────────────────────────────────────────────────────────
 async function loadWatchlistFull() {
   const tbody = $('wl-body');
-  tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Loading…</td></tr>';
   try {
     const items = await fetch('/api/watchlist').then(r => r.json());
     $('wl-count').textContent = items.length + ' stock' + (items.length === 1 ? '' : 's');
     if (!Array.isArray(items) || items.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Your watchlist is empty. Ask the agent to add tickers.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Your watchlist is empty — ask the agent to add tickers.</td></tr>';
       return;
     }
     tbody.innerHTML = items.map(item => {
-      const chg = Number(item.change_pct || 0);
+      const chg      = Number(item.change_pct || 0);
+      const sinceAdd = item.since_add_pct;
+      const sinceEl  = sinceAdd != null
+        ? `<span class="${sinceAdd >= 0 ? 'pos' : 'neg'}">${pct(sinceAdd)}</span>`
+        : '<span style="color:var(--muted)">—</span>';
+      const t = escapeHtml(item.ticker);
       return `<tr>
-        <td><span class="ticker-badge">${escapeHtml(item.ticker)}</span></td>
-        <td>${item.price ? fmt(item.price) : '--'}</td>
-        <td class="${cls(chg)}">${chg !== 0 ? pct(chg) : '--'}</td>
-        <td style="text-align:left;color:var(--text2);font-family:'Inter',sans-serif;font-size:12.5px">${escapeHtml(item.note || '--')}</td>
-        <td style="text-align:right"><button class="research-btn" onclick="send('Research ${escapeHtml(item.ticker)} - should I consider it for my portfolio?')">Ask AI</button></td>
+        <td><span class="ticker-badge">${t}</span></td>
+        <td>${item.price ? fmt(item.price) : '—'}</td>
+        <td class="${cls(chg)}">${chg !== 0 ? pct(chg) : '—'}</td>
+        <td>${sinceEl}</td>
+        <td style="text-align:left;color:var(--text2);font-family:'Inter',sans-serif;font-size:12.5px">${escapeHtml(item.note || '—')}</td>
+        <td style="text-align:right"><button class="research-btn" onclick="send('Research ${t} — should I consider adding it given my current holdings?')">Ask AI</button></td>
       </tr>`;
     }).join('');
   } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Watchlist unavailable.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Watchlist unavailable.</td></tr>';
   }
+}
+
+// ── Pre-trade preview ─────────────────────────────────────────────────────────
+async function runPreview() {
+  const ticker = $('pt-ticker').value.trim().toUpperCase();
+  const shares = parseFloat($('pt-shares').value);
+  const price  = parseFloat($('pt-price').value);
+  const result = $('pt-result');
+  const btn    = $('pt-btn');
+
+  if (!ticker || !shares || !price) {
+    result.innerHTML = '<span style="color:var(--risk-tx)">Please fill in all three fields.</span>';
+    return;
+  }
+  btn.disabled = true;
+  result.innerHTML = '<span style="color:var(--muted)">Calculating…</span>';
+
+  try {
+    const d = await fetch('/api/preview-trade', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ ticker, shares, price }),
+    }).then(r => r.json());
+
+    if (d.error) {
+      result.innerHTML = `<span style="color:var(--risk-tx)">${escapeHtml(d.error)}</span>`;
+      btn.disabled = false; return;
+    }
+
+    const delta      = d.score_delta;
+    const deltaStr   = (delta >= 0 ? '+' : '') + delta;
+    const deltaColor = delta >= 0 ? 'var(--green)' : 'var(--red)';
+    const breached   = (d.rule_checks || []).filter(r => r.status === 'breached' || r.status === 'warning');
+
+    result.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:${breached.length ? '14px' : '0'}">
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Cost</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${fmt(d.cost)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Position Weight</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${d.position_weight_pct}%</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">New Portfolio Value</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${fmt(d.new_total_value)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Diversification Score</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${d.current_score} → ${d.new_score} <span style="color:${deltaColor};font-size:12px">(${deltaStr})</span></div>
+        </div>
+      </div>
+      ${breached.length
+        ? `<div style="display:flex;flex-direction:column;gap:6px">${breached.map(r => `<div class="risk-item">⚠ ${escapeHtml(r.label)}: ${escapeHtml(r.detail)}</div>`).join('')}</div>`
+        : '<div style="color:var(--ok-tx);font-size:12.5px;padding:4px 0">✓ No rules would be breached.</div>'}`;
+  } catch (e) {
+    result.innerHTML = '<span style="color:var(--risk-tx)">Preview failed — check server.</span>';
+  }
+  btn.disabled = false;
+}
+
+// ── Portfolio Rules ───────────────────────────────────────────────────────────
+async function loadRules() {
+  const el = $('rules-list');
+  if (!el) return;
+  try {
+    const rules = await fetch('/api/rules').then(r => r.json());
+    if (!rules.length) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:13px">No rules yet. Add one below or tell the agent.</span>';
+      return;
+    }
+    el.innerHTML = rules.map(r => {
+      const icon  = r.status === 'breached' ? '✗' : r.status === 'warning' ? '⚠' : '✓';
+      const color = r.status === 'breached' ? 'var(--risk-tx)' : r.status === 'warning' ? 'var(--accent)' : 'var(--ok-tx)';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--surface2);border:1px solid var(--border)">
+        <span style="color:${color};font-size:14px;flex-shrink:0">${icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${escapeHtml(r.label)}</div>
+          <div style="font-size:11.5px;color:var(--text2);margin-top:2px">${escapeHtml(r.detail || '')}</div>
+        </div>
+        <button onclick="deleteRule('${escapeHtml(r.label).replace(/'/g, "\\'")}')" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px" title="Remove rule">✕</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = '<span style="color:var(--risk-tx);font-size:13px">Rules unavailable.</span>';
+  }
+}
+
+async function addRule() {
+  const ruleType = $('rule-type').value;
+  const p1 = $('rule-param1').value.trim();
+  const p2 = parseFloat($('rule-param2').value);
+  if (!p2 || p2 <= 0) { alert('Enter a numeric limit.'); return; }
+
+  let label, params;
+  if (ruleType === 'sector_max') {
+    if (!p1) { alert('Enter a sector name.'); return; }
+    label  = `${p1} cap ${p2}%`;
+    params = { sector: p1, max_pct: p2 };
+  } else if (ruleType === 'position_max') {
+    label  = `No single stock > ${p2}%`;
+    params = { max_pct: p2 };
+  } else {
+    label  = `Min ${Math.round(p2)} sectors`;
+    params = { min_count: Math.round(p2) };
+  }
+
+  await fetch('/api/rules', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ rule_type: ruleType, label, params }),
+  });
+  $('rule-param1').value = '';
+  $('rule-param2').value = '';
+  loadRules();
+}
+
+async function deleteRule(label) {
+  await fetch('/api/rules/' + encodeURIComponent(label), { method: 'DELETE' });
+  loadRules();
 }
 
 async function loadHistory() {
