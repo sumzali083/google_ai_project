@@ -1,6 +1,7 @@
 """Fetch live market data via yfinance (free, no API key needed)."""
 
 import logging
+import xml.etree.ElementTree as ET
 
 import requests
 import yfinance as yf
@@ -113,7 +114,7 @@ def get_news(ticker: str, limit: int = 5) -> dict:
     try:
         raw_items = yf.Ticker(ticker).news or []
     except Exception as exc:
-        return {"ticker": ticker, "headlines": [], "error": f"News unavailable: {exc}"}
+        raw_items = []
 
     headlines = []
     for item in raw_items[:limit]:
@@ -130,7 +131,34 @@ def get_news(ticker: str, limit: int = 5) -> dict:
                 "published": published,
             })
 
-    return {"ticker": ticker, "headlines": headlines}
+    if headlines:
+        return {"ticker": ticker, "headlines": headlines}
+
+    return _get_news_from_google_rss(ticker, limit)
+
+
+def _get_news_from_google_rss(ticker: str, limit: int) -> dict:
+    try:
+        response = requests.get(
+            "https://news.google.com/rss/search",
+            params={"q": f"{ticker} stock", "hl": "en-US", "gl": "US", "ceid": "US:en"},
+            timeout=10,
+        )
+        response.raise_for_status()
+        root = ET.fromstring(response.content)
+    except Exception as exc:
+        return {"ticker": ticker, "headlines": [], "error": f"News unavailable: {exc}"}
+
+    headlines = []
+    for item in root.findall("./channel/item")[:limit]:
+        headlines.append({
+            "title": item.findtext("title"),
+            "publisher": None,
+            "url": item.findtext("link"),
+            "published": item.findtext("pubDate"),
+        })
+
+    return {"ticker": ticker, "headlines": [h for h in headlines if h["title"]]}
 
 
 def get_info(ticker: str) -> dict:
