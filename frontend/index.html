@@ -750,8 +750,8 @@ tbody tr:hover td { background: var(--surface2); }
           </div>
           <div class="hist-wrap">
             <div class="hist-meta">
-              <span id="hist-start">—</span>
-              <span id="hist-end">—</span>
+              <span id="hist-start">--</span>
+              <span id="hist-end">--</span>
             </div>
             <div class="hist-canvas-wrap"><canvas id="hist"></canvas></div>
           </div>
@@ -770,7 +770,7 @@ tbody tr:hover td { background: var(--surface2); }
       <div class="card table-card">
         <div class="card-head">
           <span class="card-head-title">Watchlist</span>
-          <span class="card-head-meta" id="wl-count">—</span>
+          <span class="card-head-meta" id="wl-count">--</span>
         </div>
         <table>
           <thead>
@@ -787,7 +787,7 @@ tbody tr:hover td { background: var(--surface2); }
           </tbody>
         </table>
       </div>
-      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" — it will appear here instantly.</p>
+      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" - it will appear here instantly.</p>
     </div>
 
     <!-- ── Insights ── -->
@@ -795,27 +795,27 @@ tbody tr:hover td { background: var(--surface2); }
       <div class="ins-grid">
         <div class="ins-card">
           <div class="ins-label">Most Invested</div>
-          <div class="ins-ticker" id="ins-top-ticker">—</div>
-          <div class="ins-val" id="ins-top-val">—</div>
-          <div class="ins-sub" id="ins-top-sub">—</div>
+          <div class="ins-ticker" id="ins-top-ticker">--</div>
+          <div class="ins-val" id="ins-top-val">--</div>
+          <div class="ins-sub" id="ins-top-sub">--</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Best Performer</div>
-          <div class="ins-ticker" id="ins-best-ticker">—</div>
-          <div class="ins-val pos" id="ins-best-val">—</div>
-          <div class="ins-sub" id="ins-best-sub">—</div>
+          <div class="ins-ticker" id="ins-best-ticker">--</div>
+          <div class="ins-val pos" id="ins-best-val">--</div>
+          <div class="ins-sub" id="ins-best-sub">--</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Needs Attention</div>
-          <div class="ins-ticker" id="ins-worst-ticker">—</div>
-          <div class="ins-val" id="ins-worst-val">—</div>
-          <div class="ins-sub" id="ins-worst-sub">—</div>
+          <div class="ins-ticker" id="ins-worst-ticker">--</div>
+          <div class="ins-val" id="ins-worst-val">--</div>
+          <div class="ins-sub" id="ins-worst-sub">--</div>
         </div>
         <div class="ins-card">
           <div class="ins-label">Top Sector</div>
-          <div class="ins-ticker" id="ins-sector-name">—</div>
-          <div class="ins-val" id="ins-sector-val">—</div>
-          <div class="ins-sub" id="ins-sector-sub">—</div>
+          <div class="ins-ticker" id="ins-sector-name">--</div>
+          <div class="ins-val" id="ins-sector-val">--</div>
+          <div class="ins-sub" id="ins-sector-sub">--</div>
         </div>
       </div>
 
@@ -918,7 +918,7 @@ function updateHealth(sectors, risks) {
 
   // Herfindahl-Hirschman Index: sum of squared sector weights
   const hhi = sectors.reduce((sum, s) => sum + Math.pow(s.weight_pct / 100, 2), 0);
-  // Diversification score: 0 (single sector) → 100 (perfectly spread)
+  // Diversification score: 0 (single sector) to 100 (perfectly spread)
   const base = Math.round((1 - hhi) * 100);
   const penalty = Math.min((risks || []).length * 12, 36);
   const score = Math.max(0, Math.min(100, base - penalty));
@@ -1069,9 +1069,9 @@ async function send(txt) {
   bubble(escapeHtml(msg), 'me');
   const typing = showTyping();
 
-  $('agent-step-ai').textContent = 'Routing to Gemini 2.5…';
-  $('agent-step-db').textContent = 'Querying MongoDB holdings…';
-  $('agent-step-market').textContent = 'Fetching live prices…';
+  $('agent-step-ai').textContent = 'Routing to Gemini 2.5...';
+  $('agent-step-db').textContent = 'Querying MongoDB holdings...';
+  $('agent-step-market').textContent = 'Fetching live prices...';
 
   try {
     const res = await fetch('/api/chat', {
@@ -1083,17 +1083,17 @@ async function send(txt) {
     typing.remove();
     if (data.error) {
       bubble(escapeHtml(data.error), 'err');
-      $('agent-step-ai').textContent = 'Error — check server logs.';
+      $('agent-step-ai').textContent = 'Error - check server logs.';
       $('agent-step-db').textContent = 'DB query may have failed.';
       $('agent-step-market').textContent = 'Price fetch status unknown.';
     } else {
       bubble(cleanMarkdown(data.reply), 'ai');
-      $('agent-step-ai').textContent = `Last query: "${msg.slice(0, 40)}${msg.length > 40 ? '…' : ''}" at ${now()}`;
+      $('agent-step-ai').textContent = `Last query: "${msg.slice(0, 40)}${msg.length > 40 ? '...' : ''}" at ${now()}`;
       loadPortfolio();
     }
   } catch (e) {
     typing.remove();
-    bubble('Connection error — is the server running?', 'err');
+    bubble('Connection error - is the server running?', 'err');
     $('agent-step-ai').textContent = 'Connection failed.';
   }
   sbtn.disabled = false;
@@ -1114,7 +1114,6 @@ function switchTab(name, btn) {
   if (name === 'watchlist') loadWatchlistFull();
   if (name === 'insights') {
     if (_portfolio) populateInsights(_portfolio);
-    if (!_summaryFetched) generateSummary();
   }
 }
 
@@ -1127,10 +1126,10 @@ function populateInsights(d) {
 
   // Most invested by market value
   const top = [...holdings].sort((a, b) => b.market_value - a.market_value)[0];
-  const topPct = d.summary.total_value > 0 ? (top.market_value / d.summary.total_value * 100).toFixed(1) : '—';
+  const topPct = d.summary.total_value > 0 ? (top.market_value / d.summary.total_value * 100).toFixed(1) : '--';
   $('ins-top-ticker').textContent = top.ticker;
   $('ins-top-val').textContent    = fmt(top.market_value);
-  $('ins-top-sub').textContent    = `${topPct}% of portfolio · ${top.shares} shares`;
+  $('ins-top-sub').textContent    = `${topPct}% of portfolio - ${top.shares} shares`;
 
   // Best performer
   const best = [...holdings].sort((a, b) => b.unrealised_gain_pct - a.unrealised_gain_pct)[0];
@@ -1149,11 +1148,10 @@ function populateInsights(d) {
   // Top sector
   if (sectors.length) {
     const topSec = [...sectors].sort((a, b) => b.weight_pct - a.weight_pct)[0];
-    const secCount = holdings.filter(h => h.sector === topSec.sector || true).length; // approximate
+    const secCount = holdings.filter(h => h.sector === topSec.sector).length;
     $('ins-sector-name').textContent = topSec.sector;
     $('ins-sector-val').textContent  = topSec.weight_pct.toFixed(1) + '% of portfolio';
-    // count holdings in that sector from allocation
-    $('ins-sector-sub').textContent  = `${sectors.length} sectors total`;
+    $('ins-sector-sub').textContent  = `${secCount} holding${secCount === 1 ? '' : 's'} in top sector, ${sectors.length} sectors total`;
   }
 }
 
@@ -1165,7 +1163,7 @@ async function generateSummary() {
 
   wrap.innerHTML = `<div class="ai-sum-loading">
     <div class="typing"><span></span><span></span><span></span></div>
-    Gemini is analysing your portfolio…
+    Gemini is analysing your portfolio...
   </div>`;
 
   const prompt = `Analyse my portfolio in 3-4 bullet points. Cover: (1) my largest position and its portfolio weight, (2) the best and worst performing stocks with exact return percentages, (3) sector concentration risk, and (4) one specific actionable rebalancing suggestion. Be direct and quantitative. Phrase suggestions as things to research, not buy recommendations.`;
@@ -1194,7 +1192,7 @@ async function generateSummary() {
 // ── Watchlist full tab ────────────────────────────────────────────────────────
 async function loadWatchlistFull() {
   const tbody = $('wl-body');
-  tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Loading...</td></tr>';
   try {
     const items = await fetch('/api/watchlist').then(r => r.json());
     $('wl-count').textContent = items.length + ' stock' + (items.length === 1 ? '' : 's');
@@ -1206,10 +1204,10 @@ async function loadWatchlistFull() {
       const chg = Number(item.change_pct || 0);
       return `<tr>
         <td><span class="ticker-badge">${escapeHtml(item.ticker)}</span></td>
-        <td>${item.price ? fmt(item.price) : '—'}</td>
-        <td class="${cls(chg)}">${chg !== 0 ? pct(chg) : '—'}</td>
-        <td style="text-align:left;color:var(--text2);font-family:'Inter',sans-serif;font-size:12.5px">${escapeHtml(item.note || '—')}</td>
-        <td style="text-align:right"><button class="research-btn" onclick="send('Research ${escapeHtml(item.ticker)} — should I consider it for my portfolio?')">Ask AI</button></td>
+        <td>${item.price ? fmt(item.price) : '--'}</td>
+        <td class="${cls(chg)}">${chg !== 0 ? pct(chg) : '--'}</td>
+        <td style="text-align:left;color:var(--text2);font-family:'Inter',sans-serif;font-size:12.5px">${escapeHtml(item.note || '--')}</td>
+        <td style="text-align:right"><button class="research-btn" onclick="send('Research ${escapeHtml(item.ticker)} - should I consider it for my portfolio?')">Ask AI</button></td>
       </tr>`;
     }).join('');
   } catch (e) {
