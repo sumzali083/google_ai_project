@@ -29,16 +29,21 @@ _SYSTEM = """You are a Smart Portfolio Agent — an expert AI financial assistan
 
 You have access to:
 - Live stock prices and company fundamentals (get_stock_price, get_stock_info)
+- Recent stock headlines (get_stock_news)
 - Full portfolio analytics: P&L, allocation, risk (analyse_portfolio)
 - S&P 500 benchmark comparison (compare_to_benchmark)
 - Portfolio snapshot saving for performance tracking (save_portfolio_snapshot)
-- MongoDB tools for managing holdings and watchlist directly
+- Portfolio action tools for holdings and watchlist updates
+- MongoDB MCP tools for database-backed memory and inspection
 
 Rules:
 - Always fetch live data with tools — never invent prices or values
 - Be direct and quantitative: lead with numbers, then explanation
 - Flag concentration risk when any stock or sector exceeds 20% of portfolio
-- When users say "add X shares of TICKER at $Y", use the MongoDB add_holding tool
+- When users say "add X shares of TICKER at $Y", use add_holding
+- If the user confirms a previously discussed ticker, share count, or price, use the conversation context
+- Do not give personalised financial advice or tell the user what they must buy
+- For investment recommendations, provide educational watchlist ideas, risk tradeoffs, and ask the user to decide
 - Format clearly: use bullet points and bold numbers for readability"""
 
 
@@ -52,6 +57,40 @@ def get_stock_price(ticker: str) -> dict:
 def get_stock_info(ticker: str) -> dict:
     """Get company fundamentals: sector, P/E ratio, beta, 52-week high/low."""
     return market_data.get_info(ticker.upper())
+
+
+def get_stock_news(ticker: str) -> dict:
+    """Get recent news headlines for a stock ticker."""
+    return market_data.get_news(ticker.upper())
+
+
+def add_holding(ticker: str, shares: float, avg_cost: float, sector: str = "Unknown") -> dict:
+    """Add or update a portfolio holding in MongoDB."""
+    mongo.upsert_holding(USER_ID, ticker.upper(), shares, avg_cost, sector)
+    return {
+        "status": "ok",
+        "ticker": ticker.upper(),
+        "shares": shares,
+        "avg_cost": avg_cost,
+        "sector": sector,
+    }
+
+
+def remove_holding(ticker: str) -> dict:
+    """Remove a portfolio holding from MongoDB."""
+    mongo.delete_holding(USER_ID, ticker.upper())
+    return {"status": "ok", "ticker": ticker.upper()}
+
+
+def add_to_watchlist(ticker: str, note: str = "") -> dict:
+    """Add a ticker to the user's MongoDB-backed watchlist."""
+    mongo.add_to_watchlist(USER_ID, ticker.upper(), note)
+    return {"status": "ok", "ticker": ticker.upper(), "note": note}
+
+
+def get_watchlist() -> dict:
+    """Get the user's MongoDB-backed watchlist."""
+    return {"watchlist": mongo.get_watchlist(USER_ID)}
 
 
 def analyse_portfolio() -> dict:
@@ -129,6 +168,11 @@ async def _init():
         tools=[
             get_stock_price,
             get_stock_info,
+            get_stock_news,
+            add_holding,
+            remove_holding,
+            add_to_watchlist,
+            get_watchlist,
             analyse_portfolio,
             compare_to_benchmark,
             save_portfolio_snapshot,

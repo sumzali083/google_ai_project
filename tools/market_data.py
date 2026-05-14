@@ -107,6 +107,32 @@ def get_history(ticker: str, period: str = "1y") -> list[dict]:
     ]
 
 
+def get_news(ticker: str, limit: int = 5) -> dict:
+    """Return recent headlines for a ticker when the data provider exposes them."""
+    ticker = ticker.upper()
+    try:
+        raw_items = yf.Ticker(ticker).news or []
+    except Exception as exc:
+        return {"ticker": ticker, "headlines": [], "error": f"News unavailable: {exc}"}
+
+    headlines = []
+    for item in raw_items[:limit]:
+        content = item.get("content", item)
+        title = content.get("title") or item.get("title")
+        publisher = content.get("provider", {}).get("displayName") or item.get("publisher")
+        url = content.get("canonicalUrl", {}).get("url") or item.get("link")
+        published = content.get("pubDate") or item.get("providerPublishTime")
+        if title:
+            headlines.append({
+                "title": title,
+                "publisher": publisher,
+                "url": url,
+                "published": published,
+            })
+
+    return {"ticker": ticker, "headlines": headlines}
+
+
 def get_info(ticker: str) -> dict:
     """Return company info: name, sector, industry, P/E, beta, 52w range."""
     ticker = ticker.upper()
