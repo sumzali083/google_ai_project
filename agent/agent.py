@@ -10,6 +10,10 @@ from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
+try:
+    from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
+except ImportError:
+    StdioConnectionParams = None
 from google.genai import types
 
 from tools import market_data, portfolio_analysis, mongodb_client as mongo
@@ -20,7 +24,8 @@ USER_ID = os.environ.get("DEFAULT_USER_ID", "demo_user")
 MONGODB_URI = os.environ.get("MONGODB_URI", "")
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "project-39a25ac1-734b-42d5-996")
 LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
-NPX_COMMAND = "npx.cmd" if os.name == "nt" else "npx"
+MCP_COMMAND = "npx.cmd" if os.name == "nt" else "mongodb-mcp-server"
+MCP_ARGS = ["-y", "mongodb-mcp-server"] if os.name == "nt" else []
 
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "1"
 os.environ["GOOGLE_CLOUD_PROJECT"] = PROJECT_ID
@@ -238,12 +243,19 @@ _bg_thread.start()
 async def _init():
     global _runner, _session_id
 
+    server_params = StdioServerParameters(
+        command=MCP_COMMAND,
+        args=MCP_ARGS,
+        env={**os.environ, "MDB_MCP_CONNECTION_STRING": MONGODB_URI},
+    )
+    connection_params = (
+        StdioConnectionParams(server_params=server_params, timeout=30)
+        if StdioConnectionParams
+        else server_params
+    )
+
     mongo_mcp = MCPToolset(
-        connection_params=StdioServerParameters(
-            command=NPX_COMMAND,
-            args=["-y", "mongodb-mcp-server"],
-            env={**os.environ, "MDB_MCP_CONNECTION_STRING": MONGODB_URI},
-        ),
+        connection_params=connection_params,
         tool_filter=["find", "findOne", "insertOne", "updateOne", "deleteOne",
                      "listCollections", "listDatabases", "createIndex"],
     )

@@ -8,7 +8,6 @@ from flask_cors import CORS
 
 load_dotenv()
 
-from agent.agent import run
 from tools import mongodb_client, market_data, portfolio_analysis
 
 app = Flask(__name__, static_folder="frontend")
@@ -26,11 +25,15 @@ def chat():
     if not message:
         return jsonify({"error": "Empty message"}), 400
     try:
+        from agent.agent import run
+
         reply = run(message)
         return jsonify({"reply": reply})
     except RuntimeError as exc:
+        app.logger.exception("Chat endpoint failed with runtime error")
         return jsonify({"error": str(exc)}), 500
     except Exception as exc:
+        app.logger.exception("Chat endpoint failed")
         return jsonify({"error": f"Agent error: {exc}"}), 500
 
 

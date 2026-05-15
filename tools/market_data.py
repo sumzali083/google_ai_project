@@ -13,29 +13,6 @@ def get_price(ticker: str) -> dict:
     """Return current price, day change %, and market cap for a ticker."""
     ticker = ticker.upper()
     try:
-        t = yf.Ticker(ticker)
-        info = t.fast_info
-        hist = t.history(period="2d")
-    except Exception:
-        hist = None
-        info = None
-
-    if hist is not None and not hist.empty:
-        try:
-            prev_close = hist["Close"].iloc[-2] if len(hist) >= 2 else hist["Close"].iloc[-1]
-            current = hist["Close"].iloc[-1]
-            change_pct = round((current - prev_close) / prev_close * 100, 2)
-            return {
-                "ticker": ticker,
-                "price": round(float(current), 2),
-                "change_pct": change_pct,
-                "market_cap": getattr(info, "market_cap", None),
-                "currency": getattr(info, "currency", "USD"),
-            }
-        except Exception:
-            pass
-
-    try:
         return _get_price_from_yahoo_chart(ticker)
     except Exception:
         return _get_price_from_stooq(ticker)
