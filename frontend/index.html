@@ -255,6 +255,54 @@ nav {
   margin-bottom: 3px;
 }
 
+.info-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--surface2);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: help;
+  position: relative;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.info-dot::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  width: min(250px, 72vw);
+  transform: translateX(-50%);
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text2);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .12);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s, transform .12s;
+}
+
+.info-dot:hover::after,
+.info-dot:focus::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
 .mode-toggle {
   display: inline-flex;
   border: 1px solid var(--border);
@@ -280,35 +328,7 @@ nav {
   color: #fff;
 }
 
-.explain-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.explain-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 13px 14px;
-}
-
-.explain-card strong {
-  display: block;
-  font-size: 12.5px;
-  color: var(--text);
-  margin-bottom: 5px;
-}
-
-.explain-card span {
-  color: var(--text2);
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.advanced-only { display: none; }
-.advanced-mode .advanced-only { display: block; }
-.advanced-mode .beginner-only { display: none; }
+.advanced-mode .simple-help { display: none; }
 
 .watchlist-mini { display: flex; flex-wrap: wrap; gap: 6px; }
 
@@ -590,7 +610,6 @@ tbody tr:hover td { background: var(--surface2); }
   .bottom-row { grid-template-columns: 1fr; }
   .hist-canvas-wrap { height: 120px; }
   .activity-list { grid-template-columns: 1fr; }
-  .explain-row { grid-template-columns: 1fr; }
   .dash { padding: 14px; }
   table { min-width: 720px; }
   .card.table-card { overflow-x: auto; }
@@ -694,7 +713,6 @@ tbody tr:hover td { background: var(--surface2); }
 
 @media (max-width: 900px) {
   .ins-grid { grid-template-columns: repeat(2, 1fr); }
-  .explain-row { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -738,41 +756,22 @@ tbody tr:hover td { background: var(--surface2); }
           <div class="stat-val" id="sv">--</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Cost Basis</div>
+          <div class="stat-label">Cost Basis <span class="info-dot simple-help" tabindex="0" data-tip="The total amount you originally paid for your current holdings.">i</span></div>
           <div class="stat-val" id="sc">--</div>
         </div>
         <div class="stat">
-          <div class="stat-label"><span class="beginner-only">Gain/Loss so far</span><span class="advanced-only">Unrealised P&amp;L</span></div>
+          <div class="stat-label">Unrealised P&amp;L <span class="info-dot simple-help" tabindex="0" data-tip="Your gain or loss so far if you sold at the current live price. It is not locked in yet.">i</span></div>
           <div class="stat-val" id="sp">--</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Return</div>
+          <div class="stat-label">Return <span class="info-dot simple-help" tabindex="0" data-tip="The percentage gain or loss compared with your cost basis.">i</span></div>
           <div class="stat-val" id="spp">--</div>
-        </div>
-      </div>
-
-      <div class="explain-row beginner-only">
-        <div class="explain-card">
-          <strong>Gain/Loss so far</strong>
-          <span>How much your holdings are up or down compared with what you paid.</span>
-        </div>
-        <div class="explain-card">
-          <strong>Diversification score</strong>
-          <span>A higher score means your money is spread across more areas instead of relying on one stock or sector.</span>
-        </div>
-        <div class="explain-card">
-          <strong>Risk flags</strong>
-          <span>Warnings when too much of your portfolio is in one company or sector.</span>
-        </div>
-        <div class="explain-card">
-          <strong>Research ideas</strong>
-          <span>Educational ideas to investigate, not instructions to buy or sell.</span>
         </div>
       </div>
 
       <div class="insight-row">
         <div class="stat compact">
-          <div class="stat-label">Diversification Score</div>
+          <div class="stat-label">Diversification Score <span class="info-dot simple-help" tabindex="0" data-tip="A simple score for how spread out your portfolio is across sectors. Higher usually means less concentration risk.">i</span></div>
           <div class="health-wrap">
             <div class="health-score" id="health-ring"><span id="health-score">--</span></div>
             <div class="health-copy" id="health-copy">Waiting for live holdings.</div>
@@ -838,7 +837,7 @@ tbody tr:hover td { background: var(--surface2); }
           </div>
         </div>
         <div class="card">
-          <div class="card-head"><span class="card-head-title">Risk Flags</span></div>
+          <div class="card-head"><span class="card-head-title">Risk Flags <span class="info-dot simple-help" tabindex="0" data-tip="Warnings when too much money depends on one stock or sector.">i</span></span></div>
           <div class="risk-list" id="risks">
             <span class="risk-ok">OK: No concentration risks detected</span>
           </div>
@@ -876,25 +875,25 @@ tbody tr:hover td { background: var(--surface2); }
     <div id="tab-insights" class="tab-pane hidden">
       <div class="ins-grid">
         <div class="ins-card">
-          <div class="ins-label">Most Invested</div>
+          <div class="ins-label">Most Invested <span class="info-dot simple-help" tabindex="0" data-tip="The holding with the largest current market value in your portfolio.">i</span></div>
           <div class="ins-ticker" id="ins-top-ticker">--</div>
           <div class="ins-val" id="ins-top-val">--</div>
           <div class="ins-sub" id="ins-top-sub">--</div>
         </div>
         <div class="ins-card">
-          <div class="ins-label">Best Performer</div>
+          <div class="ins-label">Best Performer <span class="info-dot simple-help" tabindex="0" data-tip="The stock with the highest percentage gain compared with your average cost.">i</span></div>
           <div class="ins-ticker" id="ins-best-ticker">--</div>
           <div class="ins-val" id="ins-best-val">--</div>
           <div class="ins-sub" id="ins-best-sub">--</div>
         </div>
         <div class="ins-card">
-          <div class="ins-label">Needs Attention</div>
+          <div class="ins-label">Needs Attention <span class="info-dot simple-help" tabindex="0" data-tip="Usually the weakest performer or a holding worth reviewing because of loss or risk.">i</span></div>
           <div class="ins-ticker" id="ins-worst-ticker">--</div>
           <div class="ins-val" id="ins-worst-val">--</div>
           <div class="ins-sub" id="ins-worst-sub">--</div>
         </div>
         <div class="ins-card">
-          <div class="ins-label">Top Sector</div>
+          <div class="ins-label">Top Sector <span class="info-dot simple-help" tabindex="0" data-tip="The business sector where the largest share of your portfolio is invested.">i</span></div>
           <div class="ins-ticker" id="ins-sector-name">--</div>
           <div class="ins-val" id="ins-sector-val">--</div>
           <div class="ins-sub" id="ins-sector-sub">--</div>
@@ -918,7 +917,7 @@ tbody tr:hover td { background: var(--surface2); }
       <!-- Research ideas -->
       <div class="card">
         <div class="card-head">
-          <span class="card-head-title">Research Ideas</span>
+          <span class="card-head-title">Research Ideas <span class="info-dot simple-help" tabindex="0" data-tip="Educational watchlist ideas to investigate. These are not buy or sell instructions.">i</span></span>
           <span class="card-head-meta" id="ideas-time"></span>
         </div>
         <div class="ai-sum-wrap" id="ideas-wrap">
@@ -932,7 +931,7 @@ tbody tr:hover td { background: var(--surface2); }
       <!-- Pre-trade preview -->
       <div class="card">
         <div class="card-head">
-          <span class="card-head-title">Pre-Trade Preview</span>
+          <span class="card-head-title">Pre-Trade Preview <span class="info-dot simple-help" tabindex="0" data-tip="Test a trade before saving it, so you can see the effect on risk and diversification.">i</span></span>
           <span class="card-head-meta">See consequences before you buy</span>
         </div>
         <div style="padding:14px 18px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; border-bottom:1px solid var(--border)">
@@ -956,7 +955,7 @@ tbody tr:hover td { background: var(--surface2); }
       <!-- Portfolio Rules -->
       <div class="card">
         <div class="card-head">
-          <span class="card-head-title">Portfolio Rules</span>
+          <span class="card-head-title">Portfolio Rules <span class="info-dot simple-help" tabindex="0" data-tip="Personal guardrails, such as no sector above 45% or no single stock above 30%.">i</span></span>
           <span class="card-head-meta">Your personal investment policy</span>
         </div>
         <div id="rules-list" style="padding:12px 16px;display:flex;flex-direction:column;gap:7px">
@@ -1482,7 +1481,7 @@ async function runPreview() {
           <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${fmt(d.new_total_value)}</div>
         </div>
         <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Diversification Score</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Diversification Score <span class="info-dot simple-help" tabindex="0" data-tip="A simple score for how spread out the portfolio would be after this trade.">i</span></div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">${d.current_score} to ${d.new_score} <span style="color:${deltaColor};font-size:12px">(${deltaStr})</span></div>
         </div>
       </div>
