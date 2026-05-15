@@ -72,6 +72,11 @@ def get_history():
     return jsonify(snapshots)
 
 
+@app.route("/api/memory", methods=["GET"])
+def get_memory():
+    return jsonify(mongodb_client.get_memory_summary(USER_ID))
+
+
 # ── Watchlist ─────────────────────────────────────────────────────────────────
 
 @app.route("/api/watchlist", methods=["GET"])

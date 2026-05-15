@@ -123,6 +123,18 @@ def delete_rule(user_id: str, label: str):
     _db()["rules"].delete_one({"user_id": user_id, "label": label})
 
 
+def get_memory_summary(user_id: str) -> dict:
+    """Return counts that make MongoDB's role as agent memory visible."""
+    db = _db()
+    return {
+        "holdings": db["holdings"].count_documents({"user_id": user_id}),
+        "watchlist": db["watchlist"].count_documents({"user_id": user_id}),
+        "rules": db["rules"].count_documents({"user_id": user_id}),
+        "snapshots": db["snapshots"].count_documents({"user_id": user_id}),
+        "collections": ["holdings", "watchlist", "rules", "snapshots", "transactions"],
+    }
+
+
 def seed_demo_portfolio(user_id: str):
     """Reset the demo user to a polished sample portfolio for judging."""
     db = _db()

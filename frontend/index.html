@@ -231,6 +231,37 @@ nav {
 
 .health-copy { color: var(--text2); font-size: 12.5px; line-height: 1.45; }
 
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.memory-chip {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 8px 9px;
+}
+
+.memory-chip strong {
+  display: block;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.memory-chip span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .45px;
+}
+
 .activity-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -772,6 +803,16 @@ tbody tr:hover td { background: var(--surface2); }
 
       <div class="insight-row">
         <div class="stat compact">
+          <div class="stat-label">MongoDB Memory <span class="info-dot simple-help" tabindex="0" data-tip="MongoDB stores the agent's long-term portfolio memory: holdings, watchlist ideas, rules, and history.">i</span></div>
+          <div class="health-copy">Persistent agent memory synced from Atlas.</div>
+          <div class="memory-grid">
+            <div class="memory-chip"><strong id="mem-holdings">--</strong><span>Holdings</span></div>
+            <div class="memory-chip"><strong id="mem-watchlist">--</strong><span>Watchlist</span></div>
+            <div class="memory-chip"><strong id="mem-rules">--</strong><span>Rules</span></div>
+            <div class="memory-chip"><strong id="mem-snapshots">--</strong><span>Snapshots</span></div>
+          </div>
+        </div>
+        <div class="stat compact">
           <div class="stat-label">Diversification Score <span class="info-dot simple-help" tabindex="0" data-tip="A simple score for how spread out your portfolio is across sectors. Higher usually means less concentration risk.">i</span></div>
           <div class="health-wrap">
             <div class="health-score" id="health-ring"><span id="health-score">--</span></div>
@@ -1104,6 +1145,21 @@ async function loadWatchlistMini() {
   }
 }
 
+async function loadMemorySummary() {
+  try {
+    const memory = await fetch('/api/memory').then(r => r.json());
+    $('mem-holdings').textContent = memory.holdings ?? '--';
+    $('mem-watchlist').textContent = memory.watchlist ?? '--';
+    $('mem-rules').textContent = memory.rules ?? '--';
+    $('mem-snapshots').textContent = memory.snapshots ?? '--';
+  } catch (e) {
+    $('mem-holdings').textContent = '--';
+    $('mem-watchlist').textContent = '--';
+    $('mem-rules').textContent = '--';
+    $('mem-snapshots').textContent = '--';
+  }
+}
+
 async function loadPortfolio() {
   try {
     const d = await fetch('/api/portfolio').then(r => r.json());
@@ -1185,6 +1241,7 @@ async function loadPortfolio() {
     $('agent-step-db').textContent = `${(d.holdings || []).length} holding${(d.holdings || []).length === 1 ? '' : 's'} loaded from MongoDB.`;
     $('agent-step-market').textContent = `Prices refreshed at ${now()}.`;
     loadWatchlistMini();
+    loadMemorySummary();
     loadHistory();
     _portfolio = d;
     if (!document.getElementById('tab-insights').classList.contains('hidden')) populateInsights(d);
@@ -1548,11 +1605,13 @@ async function addRule() {
   $('rule-param1').value = '';
   $('rule-param2').value = '';
   loadRules();
+  loadMemorySummary();
 }
 
 async function deleteRule(label) {
   await fetch('/api/rules/' + encodeURIComponent(label), { method: 'DELETE' });
   loadRules();
+  loadMemorySummary();
 }
 
 async function loadHistory() {
