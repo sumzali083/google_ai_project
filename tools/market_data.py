@@ -18,21 +18,27 @@ def get_price(ticker: str) -> dict:
         hist = t.history(period="2d")
     except Exception:
         hist = None
+        info = None
 
     if hist is not None and not hist.empty:
-        prev_close = hist["Close"].iloc[-2] if len(hist) >= 2 else hist["Close"].iloc[-1]
-        current = hist["Close"].iloc[-1]
-        change_pct = round((current - prev_close) / prev_close * 100, 2)
+        try:
+            prev_close = hist["Close"].iloc[-2] if len(hist) >= 2 else hist["Close"].iloc[-1]
+            current = hist["Close"].iloc[-1]
+            change_pct = round((current - prev_close) / prev_close * 100, 2)
+            return {
+                "ticker": ticker,
+                "price": round(float(current), 2),
+                "change_pct": change_pct,
+                "market_cap": getattr(info, "market_cap", None),
+                "currency": getattr(info, "currency", "USD"),
+            }
+        except Exception:
+            pass
 
-        return {
-            "ticker": ticker,
-            "price": round(float(current), 2),
-            "change_pct": change_pct,
-            "market_cap": getattr(info, "market_cap", None),
-            "currency": getattr(info, "currency", "USD"),
-        }
-
-    return _get_price_from_yahoo_chart(ticker)
+    try:
+        return _get_price_from_yahoo_chart(ticker)
+    except Exception:
+        return _get_price_from_stooq(ticker)
 
 
 def _get_price_from_yahoo_chart(ticker: str) -> dict:
@@ -63,31 +69,31 @@ def _get_price_from_yahoo_chart(ticker: str) -> dict:
 
 
 def _get_price_from_stooq(ticker: str) -> dict:
-    symbol = ticker if "." in ticker else f"{ticker}.US"
-    response = requests.get(
-        "https://stooq.com/q/l/",
-        params={"s": symbol.lower(), "f": "sd2t2ohlcv", "h": "", "e": "csv"},
-        timeout=10,
-    )
-    response.raise_for_status()
-    lines = [line.strip() for line in response.text.splitlines() if line.strip()]
-    if len(lines) < 2:
-        return {"ticker": ticker, "error": f"No data for {ticker}"}
-
-    headers = lines[0].split(",")
-    values = lines[1].split(",")
-    data = dict(zip(headers, values))
-    close = data.get("Close")
-    if not close or close == "N/D":
-        return {"ticker": ticker, "error": f"No data for {ticker}"}
-
-    return {
-        "ticker": ticker,
-        "price": round(float(close), 2),
-        "change_pct": 0,
-        "market_cap": None,
-        "currency": "USD",
-    }
+    try:
+        symbol = ticker if "." in ticker else f"{ticker}.US"
+        response = requests.get(
+            "https://stooq.com/q/l/",
+            params={"s": symbol.lower(), "f": "sd2t2ohlcv", "h": "", "e": "csv"},
+            timeout=8,
+        )
+        response.raise_for_status()
+        lines = [line.strip() for line in response.text.splitlines() if line.strip()]
+        if len(lines) >= 2:
+            headers = lines[0].split(",")
+            values = lines[1].split(",")
+            data = dict(zip(headers, values))
+            close = data.get("Close")
+            if close and close != "N/D":
+                return {
+                    "ticker": ticker,
+                    "price": round(float(close), 2),
+                    "change_pct": 0,
+                    "market_cap": None,
+                    "currency": "USD",
+                }
+    except Exception:
+        pass
+    return {"ticker": ticker, "price": 0, "change_pct": 0, "market_cap": None, "currency": "USD", "error": "Price unavailable"}
 
 
 def get_history(ticker: str, period: str = "1y") -> list[dict]:
