@@ -104,7 +104,7 @@ def preview_trade():
     holdings = mongodb_client.get_holdings(USER_ID)
     prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
 
-    current_alloc = portfolio_analysis.compute_allocation(holdings, prices) if holdings else {"total_value": 0, "by_sector": [], "by_ticker": {}}
+    current_alloc = portfolio_analysis.compute_allocation(holdings, prices) if holdings else {"total_value": 0, "by_sector": [], "by_ticker": []}
     current_score = _hhi_score(current_alloc.get("by_sector", []))
 
     # Build the hypothetical portfolio
@@ -154,7 +154,7 @@ def get_rules():
         prices     = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
         allocation = portfolio_analysis.compute_allocation(holdings, prices)
     else:
-        allocation = {"by_sector": [], "by_ticker": {}}
+        allocation = {"by_sector": [], "by_ticker": []}
     alerts = _evaluate_rules(allocation, detailed=True)
     return jsonify(alerts)
 
@@ -199,7 +199,7 @@ def _hhi_score(sectors: list) -> int:
 def _evaluate_rules(allocation: dict, detailed: bool = False) -> list:
     rules   = mongodb_client.get_rules(USER_ID)
     sectors = {s["sector"]: s["weight_pct"] for s in allocation.get("by_sector", [])}
-    tickers = {t: d["weight_pct"] for t, d in allocation.get("by_ticker", {}).items()}
+    tickers = {d["ticker"]: d["weight_pct"] for d in allocation.get("by_ticker", [])}
     results = []
 
     for rule in rules:
