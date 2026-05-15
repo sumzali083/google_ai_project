@@ -111,7 +111,7 @@ def analyse_portfolio() -> dict:
     holdings = mongo.get_holdings(USER_ID)
     if not holdings:
         return {"error": "No holdings found. Add stocks first."}
-    prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+    prices = market_data.get_prices([h["ticker"] for h in holdings])
     return {
         "allocation": portfolio_analysis.compute_allocation(holdings, prices),
         "pnl": portfolio_analysis.compute_pnl(holdings, prices),
@@ -126,7 +126,7 @@ def compare_to_benchmark() -> dict:
     holdings = mongo.get_holdings(USER_ID)
     if not holdings:
         return {"error": "No holdings to compare."}
-    prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+    prices = market_data.get_prices([h["ticker"] for h in holdings])
     total_cost = sum(h["shares"] * h["avg_cost"] for h in holdings)
     total_value = sum(h["shares"] * prices[h["ticker"]] for h in holdings)
     portfolio_return = round((total_value - total_cost) / total_cost * 100, 2) if total_cost else 0
@@ -143,7 +143,7 @@ def preview_trade(ticker: str, shares: float, price: float) -> dict:
     """Preview the portfolio impact of buying shares at a given price before executing.
     Returns new diversification score, position weight, sector changes, and any rule breaches."""
     holdings = mongo.get_holdings(USER_ID)
-    prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+    prices = market_data.get_prices([h["ticker"] for h in holdings])
     current_alloc = portfolio_analysis.compute_allocation(holdings, prices) if holdings else {"total_value": 0, "by_sector": [], "by_ticker": {}}
 
     def hhi_score(sectors):
@@ -223,7 +223,7 @@ def save_portfolio_snapshot() -> dict:
     holdings = mongo.get_holdings(USER_ID)
     if not holdings:
         return {"error": "No holdings to snapshot."}
-    prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+    prices = market_data.get_prices([h["ticker"] for h in holdings])
     total_value = round(sum(h["shares"] * prices[h["ticker"]] for h in holdings), 2)
     total_cost = round(sum(h["shares"] * h["avg_cost"] for h in holdings), 2)
     mongo.save_snapshot(USER_ID, total_value, total_cost)

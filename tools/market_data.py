@@ -1,21 +1,52 @@
 """Fetch live market data via yfinance (free, no API key needed)."""
 
 import logging
+import time
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 import yfinance as yf
 
 logging.getLogger("yfinance").disabled = True
 
+_PRICE_CACHE = {}
+_PRICE_TTL_SECONDS = 60
+
 
 def get_price(ticker: str) -> dict:
     """Return current price, day change %, and market cap for a ticker."""
     ticker = ticker.upper()
+    cached = _PRICE_CACHE.get(ticker)
+    if cached and time.time() - cached["time"] < _PRICE_TTL_SECONDS:
+        return cached["data"]
+
     try:
-        return _get_price_from_yahoo_chart(ticker)
+        data = _get_price_from_yahoo_chart(ticker)
     except Exception:
-        return _get_price_from_stooq(ticker)
+        data = _get_price_from_stooq(ticker)
+
+    _PRICE_CACHE[ticker] = {"time": time.time(), "data": data}
+    return data
+
+
+def get_prices(tickers: list[str]) -> dict:
+    """Fetch prices for many tickers in parallel, using the short in-process cache."""
+    unique = sorted({ticker.upper() for ticker in tickers if ticker})
+    if not unique:
+        return {}
+
+    prices = {}
+    max_workers = min(8, len(unique))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(get_price, ticker): ticker for ticker in unique}
+        for future in as_completed(futures):
+            ticker = futures[future]
+            try:
+                prices[ticker] = future.result().get("price", 0)
+            except Exception:
+                prices[ticker] = 0
+    return prices
 
 
 def _get_price_from_yahoo_chart(ticker: str) -> dict:

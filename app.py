@@ -45,7 +45,7 @@ def get_portfolio():
     if not holdings:
         return jsonify({"holdings": [], "summary": {}, "allocation_by_sector": [], "risks": [], "rule_alerts": []})
 
-    prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+    prices = market_data.get_prices([h["ticker"] for h in holdings])
     allocation = portfolio_analysis.compute_allocation(holdings, prices)
     pnl = portfolio_analysis.compute_pnl(holdings, prices)
     risks = portfolio_analysis.concentration_risk(allocation)
@@ -105,7 +105,7 @@ def preview_trade():
         return jsonify({"error": "Provide a valid ticker, shares > 0, and price > 0"}), 400
 
     holdings = mongodb_client.get_holdings(USER_ID)
-    prices = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+    prices = market_data.get_prices([h["ticker"] for h in holdings])
 
     current_alloc = portfolio_analysis.compute_allocation(holdings, prices) if holdings else {"total_value": 0, "by_sector": [], "by_ticker": []}
     current_score = _hhi_score(current_alloc.get("by_sector", []))
@@ -154,7 +154,7 @@ def preview_trade():
 def get_rules():
     holdings = mongodb_client.get_holdings(USER_ID)
     if holdings:
-        prices     = {h["ticker"]: market_data.get_price(h["ticker"]).get("price", 0) for h in holdings}
+        prices     = market_data.get_prices([h["ticker"] for h in holdings])
         allocation = portfolio_analysis.compute_allocation(holdings, prices)
     else:
         allocation = {"by_sector": [], "by_ticker": []}
