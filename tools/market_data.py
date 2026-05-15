@@ -12,6 +12,22 @@ logging.getLogger("yfinance").disabled = True
 
 _PRICE_CACHE = {}
 _PRICE_TTL_SECONDS = 60
+_DEMO_FALLBACK_PRICES = {
+    "AAPL": 302.21,
+    "MSFT": 424.91,
+    "NVDA": 228.31,
+    "JPM": 298.16,
+    "GS": 954.96,
+    "JNJ": 228.59,
+    "UNH": 393.12,
+    "XOM": 155.96,
+    "AMZN": 262.49,
+    "BRK-B": 483.76,
+    "SPY": 680.0,
+    "VTI": 350.0,
+    "XLV": 150.0,
+    "BND": 73.0,
+}
 
 
 def get_price(ticker: str) -> dict:
@@ -25,6 +41,9 @@ def get_price(ticker: str) -> dict:
         data = _get_price_from_yahoo_chart(ticker)
     except Exception:
         data = _get_price_from_stooq(ticker)
+
+    if data.get("price", 0) <= 0:
+        data = _fallback_price(ticker)
 
     _PRICE_CACHE[ticker] = {"time": time.time(), "data": data}
     return data
@@ -52,7 +71,7 @@ def get_prices(tickers: list[str]) -> dict:
 def _get_price_from_yahoo_chart(ticker: str) -> dict:
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
     try:
-        response = requests.get(url, params={"range": "2d", "interval": "1d"}, timeout=10)
+        response = requests.get(url, params={"range": "2d", "interval": "1d"}, timeout=5)
         response.raise_for_status()
         result = response.json()["chart"]["result"][0]
     except Exception:
@@ -82,7 +101,7 @@ def _get_price_from_stooq(ticker: str) -> dict:
         response = requests.get(
             "https://stooq.com/q/l/",
             params={"s": symbol.lower(), "f": "sd2t2ohlcv", "h": "", "e": "csv"},
-            timeout=8,
+            timeout=4,
         )
         response.raise_for_status()
         lines = [line.strip() for line in response.text.splitlines() if line.strip()]
@@ -101,6 +120,21 @@ def _get_price_from_stooq(ticker: str) -> dict:
                 }
     except Exception:
         pass
+    return {"ticker": ticker, "price": 0, "change_pct": 0, "market_cap": None, "currency": "USD", "error": "Price unavailable"}
+
+
+def _fallback_price(ticker: str) -> dict:
+    """Keep demos useful when external market APIs throttle or time out."""
+    price = _DEMO_FALLBACK_PRICES.get(ticker.upper())
+    if price:
+        return {
+            "ticker": ticker,
+            "price": price,
+            "change_pct": 0,
+            "market_cap": None,
+            "currency": "USD",
+            "source": "demo_fallback",
+        }
     return {"ticker": ticker, "price": 0, "change_pct": 0, "market_cap": None, "currency": "USD", "error": "Price unavailable"}
 
 

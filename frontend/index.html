@@ -437,11 +437,12 @@ tbody tr:hover td { background: var(--surface2); }
   font-size: 13px;
 }
 
-.bottom-row { display: grid; grid-template-columns: 200px 1fr 200px; gap: 14px; }
+.bottom-row { display: grid; grid-template-columns: 200px minmax(280px, 1fr) minmax(260px, 1fr) 220px; gap: 14px; }
 .chart-wrap { display: flex; align-items: center; justify-content: center; padding: 18px 16px; }
 .hist-wrap { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
 .hist-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
 .hist-canvas-wrap { position: relative; height: 148px; }
+.risk-chart-wrap { position: relative; height: 180px; padding: 14px 16px 16px; }
 .risk-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 7px; }
 
 .risk-item {
@@ -845,10 +846,10 @@ tbody tr:hover td { background: var(--surface2); }
             <tr>
               <th style="text-align:left">Ticker</th>
               <th>Shares</th>
-              <th>Avg Cost</th>
+              <th>Avg Cost <span class="info-dot simple-help" tabindex="0" data-tip="The average price you paid per share.">i</span></th>
               <th>Price</th>
               <th>Value</th>
-              <th>P&amp;L</th>
+              <th>P&amp;L <span class="info-dot simple-help" tabindex="0" data-tip="Profit and loss: how much the holding is up or down compared with your cost.">i</span></th>
               <th>Return</th>
             </tr>
           </thead>
@@ -860,14 +861,14 @@ tbody tr:hover td { background: var(--surface2); }
 
       <div class="bottom-row">
         <div class="card">
-          <div class="card-head"><span class="card-head-title">Sectors</span></div>
+          <div class="card-head"><span class="card-head-title">Sectors <span class="info-dot simple-help" tabindex="0" data-tip="How your money is split across industries like Technology, Healthcare, Energy, and Finance.">i</span></span></div>
           <div class="chart-wrap">
             <canvas id="donut" width="180" height="180"></canvas>
           </div>
         </div>
         <div class="card">
           <div class="card-head">
-            <span class="card-head-title">Performance</span>
+            <span class="card-head-title">Performance <span class="info-dot simple-help" tabindex="0" data-tip="A saved history of portfolio value snapshots over time.">i</span></span>
             <span class="card-head-meta" id="hist-range">30d</span>
           </div>
           <div class="hist-wrap">
@@ -877,6 +878,13 @@ tbody tr:hover td { background: var(--surface2); }
             </div>
             <div class="hist-canvas-wrap"><canvas id="hist"></canvas></div>
           </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-head-title">Risk Exposure <span class="info-dot simple-help" tabindex="0" data-tip="A bar chart of your biggest concentration risks against common risk limits.">i</span></span>
+            <span class="card-head-meta">Limits</span>
+          </div>
+          <div class="risk-chart-wrap"><canvas id="riskChart"></canvas></div>
         </div>
         <div class="card">
           <div class="card-head"><span class="card-head-title">Risk Flags <span class="info-dot simple-help" tabindex="0" data-tip="Warnings when too much money depends on one stock or sector.">i</span></span></div>
@@ -891,7 +899,7 @@ tbody tr:hover td { background: var(--surface2); }
     <div id="tab-watchlist" class="tab-pane hidden">
       <div class="card table-card">
         <div class="card-head">
-          <span class="card-head-title">Watchlist</span>
+          <span class="card-head-title">Watchlist <span class="info-dot simple-help" tabindex="0" data-tip="Stocks or ETFs saved as research ideas. They are not recommendations to buy.">i</span></span>
           <span class="card-head-meta" id="wl-count">--</span>
         </div>
         <table>
@@ -1063,6 +1071,11 @@ function setTheme(t) {
   }
 }
 
+const $ = id => document.getElementById(id);
+const fmt = n => n == null ? '--' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = n => n == null ? '--' : (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%';
+const cls = n => n >= 0 ? 'pos' : 'neg';
+
 const savedTheme = localStorage.getItem('theme') || 'light';
 setTheme(savedTheme);
 themeBtn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
@@ -1070,17 +1083,12 @@ themeBtn.addEventListener('click', () => setTheme(html.getAttribute('data-theme'
 function setMode(mode) {
   const advanced = mode === 'advanced';
   document.body.classList.toggle('advanced-mode', advanced);
-  document.getElementById('simple-mode-btn').classList.toggle('active', !advanced);
-  document.getElementById('advanced-mode-btn').classList.toggle('active', advanced);
+  $('simple-mode-btn').classList.toggle('active', !advanced);
+  $('advanced-mode-btn').classList.toggle('active', advanced);
   localStorage.setItem('explainMode', mode);
 }
 
 setMode(localStorage.getItem('explainMode') || 'simple');
-
-const $ = id => document.getElementById(id);
-const fmt = n => n == null ? '--' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const pct = n => n == null ? '--' : (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%';
-const cls = n => n >= 0 ? 'pos' : 'neg';
 
 function now() {
   return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -1127,6 +1135,86 @@ function updateHealth(sectors, risks) {
   else if (score >= 60) copy.textContent = `Moderate spread across ${nSectors} sectors. HHI: ${hhi.toFixed(2)}.`;
   else if ((risks || []).length) copy.textContent = `${risks.length} concentration flag${risks.length > 1 ? 's' : ''}. Consider spreading across more sectors.`;
   else copy.textContent = `Concentrated in ${nSectors} sector${nSectors > 1 ? 's' : ''}. Diversify to improve score.`;
+}
+
+function updateRiskChart(d) {
+  const canvas = $('riskChart');
+  if (!canvas) return;
+
+  const holdings = d.holdings || [];
+  const sectors = Array.isArray(d.allocation_by_sector) ? d.allocation_by_sector : [];
+  const rows = [];
+
+  if (holdings.length && d.summary?.total_value) {
+    const topHolding = [...holdings].sort((a, b) => b.market_value - a.market_value)[0];
+    rows.push({
+      label: topHolding.ticker,
+      value: topHolding.market_value / d.summary.total_value * 100,
+      limit: 30,
+    });
+  }
+
+  sectors.slice(0, 3).forEach(sector => {
+    rows.push({
+      label: sector.sector,
+      value: sector.weight_pct,
+      limit: sector.sector === 'Technology' ? 45 : 20,
+    });
+  });
+
+  if (!rows.length) return;
+
+  const text2 = getComputedStyle(html).getPropertyValue('--text2').trim();
+  const border = getComputedStyle(html).getPropertyValue('--border').trim();
+  const accent = getComputedStyle(html).getPropertyValue('--accent').trim();
+  const red = getComputedStyle(html).getPropertyValue('--red').trim();
+
+  if (riskChart) riskChart.destroy();
+  riskChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.label),
+      datasets: [
+        {
+          label: 'Exposure',
+          data: rows.map(r => Number(r.value.toFixed(1))),
+          backgroundColor: rows.map(r => r.value > r.limit ? red : accent),
+          borderRadius: 6,
+          barThickness: 18,
+        },
+        {
+          label: 'Limit',
+          data: rows.map(r => r.limit),
+          backgroundColor: border,
+          borderRadius: 6,
+          barThickness: 8,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.x.toFixed(1)}%` } },
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          suggestedMax: 60,
+          grid: { color: border },
+          ticks: { color: text2, callback: v => v + '%' },
+          border: { display: false },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: text2, font: { size: 11 } },
+          border: { display: false },
+        },
+      },
+    },
+  });
 }
 
 async function loadWatchlistMini() {
@@ -1237,6 +1325,7 @@ async function loadPortfolio() {
       : risks.map(r => `<div class="risk-item">Warning: ${escapeHtml(r.message || r)}</div>`).join('');
 
     updateHealth(sectors, risks);
+    updateRiskChart(d);
     $('agent-step-ai').textContent = 'Ready for risk, benchmark, and watchlist questions.';
     $('agent-step-db').textContent = `${(d.holdings || []).length} holding${(d.holdings || []).length === 1 ? '' : 's'} loaded from MongoDB.`;
     $('agent-step-market').textContent = `Prices refreshed at ${now()}.`;
@@ -1313,6 +1402,7 @@ async function send(txt) {
 }
 
 let histChart = null;
+let riskChart = null;
 let _portfolio = null;  // cached portfolio response
 let _summaryFetched = false;
 let _ideasFetched = false;
@@ -1400,7 +1490,13 @@ async function generateSummary() {
     Gemini is analysing your portfolio...
   </div>`;
 
-  const prompt = `Analyse my portfolio in 3-4 bullet points. Cover: (1) my largest position and its portfolio weight, (2) the best and worst performing stocks with exact return percentages, (3) sector concentration risk, and (4) one specific actionable rebalancing suggestion. Be direct and quantitative. Phrase suggestions as things to research, not buy recommendations.`;
+  const prompt = `Analyse my portfolio as a beginner-friendly risk coach. Use clear sections:
+1. Portfolio snapshot: total value, return, and number of holdings.
+2. Biggest concentration risks: top stock, top sector, and any rule breaches.
+3. Performance: best and worst performers with exact percentages.
+4. What this means in plain English: explain one finance concept from the analysis.
+5. Research next: 2-3 portfolio-fit ideas or areas to research, not buy/sell advice.
+Be direct, quantitative, and do not give personalised financial advice.`;
 
   try {
     const res  = await fetch('/api/chat', {
