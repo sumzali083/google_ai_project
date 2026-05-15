@@ -255,6 +255,61 @@ nav {
   margin-bottom: 3px;
 }
 
+.mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.mode-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text2);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.explain-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.explain-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 14px;
+}
+
+.explain-card strong {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+
+.explain-card span {
+  color: var(--text2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.advanced-only { display: none; }
+.advanced-mode .advanced-only { display: block; }
+.advanced-mode .beginner-only { display: none; }
+
 .watchlist-mini { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .watch-pill {
@@ -535,6 +590,7 @@ tbody tr:hover td { background: var(--surface2); }
   .bottom-row { grid-template-columns: 1fr; }
   .hist-canvas-wrap { height: 120px; }
   .activity-list { grid-template-columns: 1fr; }
+  .explain-row { grid-template-columns: 1fr; }
   .dash { padding: 14px; }
   table { min-width: 720px; }
   .card.table-card { overflow-x: auto; }
@@ -638,6 +694,7 @@ tbody tr:hover td { background: var(--surface2); }
 
 @media (max-width: 900px) {
   .ins-grid { grid-template-columns: repeat(2, 1fr); }
+  .explain-row { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -656,6 +713,10 @@ tbody tr:hover td { background: var(--surface2); }
     <span class="tech-pill">Live market data</span>
   </div>
   <div class="spacer"></div>
+  <div class="mode-toggle" title="Switch explanation depth">
+    <button class="mode-btn active" id="simple-mode-btn" onclick="setMode('simple')">Simple</button>
+    <button class="mode-btn" id="advanced-mode-btn" onclick="setMode('advanced')">Advanced</button>
+  </div>
   <button class="theme-btn" id="theme-btn" title="Toggle theme">Dark</button>
 </nav>
 
@@ -666,6 +727,7 @@ tbody tr:hover td { background: var(--surface2); }
       <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
       <button class="tab-btn" onclick="switchTab('watchlist', this)">Watchlist</button>
       <button class="tab-btn" onclick="switchTab('insights', this)">Insights</button>
+      <button class="tab-btn" onclick="seedDemoPortfolio()">Demo Mode</button>
     </div>
 
     <!-- ── Overview ── -->
@@ -680,12 +742,31 @@ tbody tr:hover td { background: var(--surface2); }
           <div class="stat-val" id="sc">--</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Unrealised P&amp;L</div>
+          <div class="stat-label"><span class="beginner-only">Gain/Loss so far</span><span class="advanced-only">Unrealised P&amp;L</span></div>
           <div class="stat-val" id="sp">--</div>
         </div>
         <div class="stat">
           <div class="stat-label">Return</div>
           <div class="stat-val" id="spp">--</div>
+        </div>
+      </div>
+
+      <div class="explain-row beginner-only">
+        <div class="explain-card">
+          <strong>Gain/Loss so far</strong>
+          <span>How much your holdings are up or down compared with what you paid.</span>
+        </div>
+        <div class="explain-card">
+          <strong>Diversification score</strong>
+          <span>A higher score means your money is spread across more areas instead of relying on one stock or sector.</span>
+        </div>
+        <div class="explain-card">
+          <strong>Risk flags</strong>
+          <span>Warnings when too much of your portfolio is in one company or sector.</span>
+        </div>
+        <div class="explain-card">
+          <strong>Research ideas</strong>
+          <span>Educational ideas to investigate, not instructions to buy or sell.</span>
         </div>
       </div>
 
@@ -910,6 +991,8 @@ tbody tr:hover td { background: var(--surface2); }
       <span class="chip" onclick="send(this.textContent)">Analyse my portfolio</span>
       <span class="chip" onclick="send(this.textContent)">Biggest risks?</span>
       <span class="chip" onclick="send(this.textContent)">Compare to S&amp;P 500</span>
+      <span class="chip" onclick="send(this.textContent)">Explain this like I am new to investing</span>
+      <span class="chip" onclick="send(this.textContent)">Suggest research ideas</span>
       <span class="chip" onclick="send(this.textContent)">AAPL price</span>
       <span class="chip" onclick="send(this.textContent)">Save snapshot</span>
     </div>
@@ -942,6 +1025,16 @@ function setTheme(t) {
 const savedTheme = localStorage.getItem('theme') || 'light';
 setTheme(savedTheme);
 themeBtn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+function setMode(mode) {
+  const advanced = mode === 'advanced';
+  document.body.classList.toggle('advanced-mode', advanced);
+  document.getElementById('simple-mode-btn').classList.toggle('active', !advanced);
+  document.getElementById('advanced-mode-btn').classList.toggle('active', advanced);
+  localStorage.setItem('explainMode', mode);
+}
+
+setMode(localStorage.getItem('explainMode') || 'simple');
 
 const $ = id => document.getElementById(id);
 const fmt = n => n == null ? '--' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1182,6 +1275,26 @@ function switchTab(name, btn) {
 }
 
 // ── Insights ──────────────────────────────────────────────────────────────────
+async function seedDemoPortfolio() {
+  $('agent-step-ai').textContent = 'Loading polished demo portfolio...';
+  $('agent-step-db').textContent = 'Resetting MongoDB demo memory.';
+  $('agent-step-market').textContent = 'Live prices will refresh after seed.';
+  try {
+    const res = await fetch('/api/demo/seed', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    bubble('Demo portfolio loaded: diversified holdings, watchlist ideas, and portfolio rules are ready.', 'ai');
+    await loadPortfolio();
+    if (!document.getElementById('tab-insights').classList.contains('hidden')) {
+      loadRules();
+      populateInsights(_portfolio);
+    }
+  } catch (e) {
+    bubble('Demo mode failed - check the server logs.', 'err');
+    $('agent-step-ai').textContent = 'Demo mode failed.';
+  }
+}
+
 function populateInsights(d) {
   const holdings = d.holdings || [];
   const sectors  = Array.isArray(d.allocation_by_sector) ? d.allocation_by_sector : [];

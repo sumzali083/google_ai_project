@@ -121,3 +121,36 @@ def upsert_rule(user_id: str, rule_type: str, label: str, params: dict):
 
 def delete_rule(user_id: str, label: str):
     _db()["rules"].delete_one({"user_id": user_id, "label": label})
+
+
+def seed_demo_portfolio(user_id: str):
+    """Reset the demo user to a polished sample portfolio for judging."""
+    db = _db()
+    holdings = [
+        ("AAPL", 100, 152.00, "Technology"),
+        ("MSFT", 50, 285.00, "Technology"),
+        ("NVDA", 20, 420.00, "Technology"),
+        ("JPM", 40, 148.00, "Financial Services"),
+        ("GS", 10, 335.00, "Financial Services"),
+        ("JNJ", 35, 158.00, "Healthcare"),
+        ("UNH", 8, 490.00, "Healthcare"),
+        ("XOM", 55, 108.00, "Energy"),
+        ("AMZN", 25, 135.00, "Consumer Cyclical"),
+        ("BRK-B", 30, 295.00, "Financial Services"),
+    ]
+
+    for name in ("holdings", "watchlist", "rules"):
+        db[name].delete_many({"user_id": user_id})
+
+    for ticker, shares, avg_cost, sector in holdings:
+        upsert_holding(user_id, ticker, shares, avg_cost, sector)
+
+    add_to_watchlist(user_id, "VTI", "Broad US market ETF to research for diversification", 0)
+    add_to_watchlist(user_id, "XLV", "Healthcare sector ETF to compare against tech exposure", 0)
+    add_to_watchlist(user_id, "BND", "Bond ETF research idea for lower-volatility allocation", 0)
+
+    upsert_rule(user_id, "sector_max", "Tech cap 45%", {"sector": "Technology", "max_pct": 45})
+    upsert_rule(user_id, "position_max", "No single stock > 30%", {"max_pct": 30})
+    upsert_rule(user_id, "min_sectors", "At least 4 sectors", {"min_count": 4})
+
+    return {"status": "ok", "holdings": len(holdings), "watchlist": 3, "rules": 3}

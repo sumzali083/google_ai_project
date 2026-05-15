@@ -182,6 +182,12 @@ def delete_rule(label):
 
 # ── Serve frontend ─────────────────────────────────────────────────────────────
 
+@app.route("/api/demo/seed", methods=["POST"])
+def seed_demo():
+    result = mongodb_client.seed_demo_portfolio(USER_ID)
+    return jsonify(result)
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
