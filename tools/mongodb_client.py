@@ -9,7 +9,11 @@ from pymongo.collection import Collection
 
 
 def _db():
-    client = MongoClient(os.environ["MONGODB_URI"], tlsCAFile=certifi.where())
+    client = MongoClient(
+        os.environ["MONGODB_URI"],
+        tlsCAFile=certifi.where(),
+        tlsDisableOCSPEndpointCheck=True,
+    )
     return client["portfolio_agent"]
 
 
