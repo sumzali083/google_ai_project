@@ -2,12 +2,14 @@
 
 import os
 from datetime import datetime, timezone
+
+import certifi
 from pymongo import MongoClient, DESCENDING
 from pymongo.collection import Collection
 
 
 def _db():
-    client = MongoClient(os.environ["MONGODB_URI"])
+    client = MongoClient(os.environ["MONGODB_URI"], tlsCAFile=certifi.where())
     return client["portfolio_agent"]
 
 
