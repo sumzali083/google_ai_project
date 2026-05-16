@@ -27,6 +27,7 @@ _DEMO_FALLBACK_PRICES = {
     "VTI": 350.0,
     "XLV": 150.0,
     "BND": 73.0,
+    "SGOV": 100.7,
 }
 
 
