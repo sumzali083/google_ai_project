@@ -1052,6 +1052,73 @@ tbody tr:hover td { background: var(--surface2); }
   line-height: 1.45;
 }
 
+/* ── Advisor Quiz ── */
+.quiz-q { padding: 20px 22px; }
+.quiz-question { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 16px; line-height: 1.45; }
+.quiz-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.quiz-option {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 12px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; text-align: left;
+  transition: border-color .15s, background .15s;
+}
+.quiz-option:hover { border-color: var(--accent); }
+.quiz-option.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface2)); }
+.quiz-option-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.quiz-option-hint { font-size: 11px; color: var(--muted); }
+.quiz-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px; border-top: 1px solid var(--border); }
+.quiz-dots { display: flex; gap: 6px; }
+.quiz-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); transition: background .2s; }
+.quiz-dot.active { background: var(--accent); }
+.quiz-dot.done { background: var(--green); }
+.profile-result { padding: 18px 22px; display: grid; grid-template-columns: 80px 1fr; gap: 18px; align-items: start; }
+.profile-badge {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 11px; font-weight: 800;
+  text-align: center; line-height: 1.2; border: 3px solid; flex-shrink: 0;
+}
+.profile-name { font-size: 19px; font-weight: 700; margin-bottom: 5px; }
+.profile-desc { font-size: 12.5px; color: var(--text2); line-height: 1.55; margin-bottom: 12px; }
+.allocation-bar { display: flex; border-radius: 999px; overflow: hidden; height: 8px; margin-bottom: 10px; gap: 2px; }
+.alloc-seg { height: 100%; border-radius: 999px; }
+.alloc-legend { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.alloc-legend span { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 5px; }
+.alloc-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.profile-ideas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+.profile-idea { border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; background: var(--surface2); }
+.profile-idea-ticker { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 3px; }
+.profile-idea-note { font-size: 11.5px; color: var(--text2); line-height: 1.4; }
+.profile-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+/* ── Goal Planner ── */
+.goal-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.goal-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 12px 8px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; transition: all .15s;
+}
+.goal-btn:hover { border-color: var(--accent); }
+.goal-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface2)); }
+.goal-btn-icon { font-size: 20px; line-height: 1; }
+.goal-btn-label { font-size: 11px; font-weight: 600; color: var(--text2); text-align: center; line-height: 1.3; }
+.goal-inputs { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.goal-field { display: flex; flex-direction: column; gap: 4px; }
+.goal-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+.goal-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; width: 130px; transition: border-color .15s; }
+.goal-field input:focus { border-color: var(--accent); }
+.goal-result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 14px 18px; }
+.goal-stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.goal-stat-label, .goal-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 4px; }
+.goal-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.goal-stat-sub { font-size: 11.5px; color: var(--text2); }
+.alloc-dot-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+.goal-chart-wrap { position: relative; height: 130px; padding: 0 18px 14px; }
+/* ── Advisor topic cards ── */
+.advisor-card { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.advisor-card:hover { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent); }
+.advisor-card .advisor-kicker { font-size: 18px; margin-bottom: 8px; }
+
 @media (max-width: 900px) {
   .ins-grid { grid-template-columns: repeat(2, 1fr); }
   .starter-hero { grid-template-columns: 1fr; }
@@ -1172,28 +1239,111 @@ tbody tr:hover td { background: var(--surface2); }
     </div>
 
     <div id="tab-advisor" class="tab-pane hidden">
-      <div class="advisor-hero">
-        <div class="advisor-panel">
-          <h2>A financial advisor for people starting small.</h2>
-          <p>PortfolioAI helps beginners think through money decisions before they act: what to research, how much risk they are taking, whether they are too concentrated, and what questions to ask next. It is designed for people who cannot afford private wealth management but still deserve clear guidance.</p>
-          <div class="starter-hero-actions" style="margin-top:14px;justify-content:flex-start">
-            <button class="gen-btn" onclick="send('Act like a beginner-friendly financial coach. Help me make a simple money plan covering saving, investing, risk, goals, and what I should learn next. Do not give guaranteed returns or personalised regulated financial advice.')">Ask for Money Plan</button>
-            <button class="gen-btn" onclick="send('Explain the difference between investing, saving, emergency funds, pensions, ISAs, ETFs, insurance, and risk management for a beginner.')">Explain Basics</button>
-          </div>
+
+      <!-- Risk Profile Quiz -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <span class="card-head-title">Risk Profile Quiz <span class="info-dot simple-help" tabindex="0" data-tip="Answer 4 quick questions to discover your investor profile and get personalised research ideas.">i</span></span>
+          <span class="card-head-meta" id="quiz-progress-label">Question 1 of 4</span>
         </div>
-        <div class="advisor-panel advisor-warning">
-          <div class="starter-kicker">Important Warning</div>
-          <p>This app is educational and cannot guarantee returns. It is not a regulated financial advisor, and it does not know your full personal circumstances. Use it to learn, compare options, and prepare better questions before making decisions.</p>
+        <div id="quiz-container">
+          <!-- rendered by renderQuiz() -->
         </div>
       </div>
 
+      <!-- Goal Planner -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <span class="card-head-title">Goal Planner <span class="info-dot simple-help" tabindex="0" data-tip="Enter your target, monthly savings, and expected return to see how long it takes to reach your goal.">i</span></span>
+          <span class="card-head-meta">Compound interest calculator</span>
+        </div>
+        <div class="goal-selector" id="goal-selector">
+          <button class="goal-btn active" data-goal="house" onclick="selectGoal('house',this)">
+            <div class="goal-btn-icon">🏠</div>
+            <div class="goal-btn-label">House</div>
+          </button>
+          <button class="goal-btn" data-goal="emergency" onclick="selectGoal('emergency',this)">
+            <div class="goal-btn-icon">🛡️</div>
+            <div class="goal-btn-label">Emergency</div>
+          </button>
+          <button class="goal-btn" data-goal="retirement" onclick="selectGoal('retirement',this)">
+            <div class="goal-btn-icon">🌅</div>
+            <div class="goal-btn-label">Retirement</div>
+          </button>
+          <button class="goal-btn" data-goal="car" onclick="selectGoal('car',this)">
+            <div class="goal-btn-icon">🚗</div>
+            <div class="goal-btn-label">Car / Other</div>
+          </button>
+        </div>
+        <div class="goal-inputs">
+          <div class="goal-field">
+            <label>Target amount ($)</label>
+            <input type="number" id="goal-target" value="50000" min="1" oninput="calculateGoal()">
+          </div>
+          <div class="goal-field">
+            <label>Monthly contribution ($)</label>
+            <input type="number" id="goal-monthly" value="500" min="1" oninput="calculateGoal()">
+          </div>
+          <div class="goal-field">
+            <label>Annual return (%)</label>
+            <input type="number" id="goal-return" value="7" step="0.1" min="0" max="50" oninput="calculateGoal()">
+          </div>
+          <div class="goal-field">
+            <label>Starting amount ($)</label>
+            <input type="number" id="goal-start" value="0" min="0" oninput="calculateGoal()">
+          </div>
+        </div>
+        <div class="goal-result-grid" id="goal-result">
+          <div class="goal-stat-box"><div class="goal-stat-val" id="gr-time">--</div><div class="goal-stat-lbl">Time to goal</div></div>
+          <div class="goal-stat-box"><div class="goal-stat-val" id="gr-contributed">--</div><div class="goal-stat-lbl">You contribute</div></div>
+          <div class="goal-stat-box"><div class="goal-stat-val" id="gr-growth">--</div><div class="goal-stat-lbl">Investment growth</div></div>
+          <div class="goal-stat-box"><div class="goal-stat-val" id="gr-total">--</div><div class="goal-stat-lbl">Total at goal</div></div>
+        </div>
+        <div class="goal-chart-wrap">
+          <canvas id="goal-chart" height="140"></canvas>
+        </div>
+        <div style="padding:8px 18px 14px;display:flex;justify-content:flex-end">
+          <button class="gen-btn" id="goal-ask-btn" onclick="askAboutGoal()">Ask AI about this goal</button>
+        </div>
+      </div>
+
+      <!-- Topic cards (clickable → send to AI) -->
       <div class="advisor-grid">
-        <div class="advisor-card"><strong>Investing</strong><span>Research stocks, ETFs, pensions, ISAs, and portfolio diversification without turning every idea into a buy signal.</span></div>
-        <div class="advisor-card"><strong>Saving Goals</strong><span>Think through goals like a house deposit, university, family costs, or a first emergency fund.</span></div>
-        <div class="advisor-card"><strong>Risk Management</strong><span>Check concentration, volatility, sector exposure, and whether a trade would break your own rules.</span></div>
-        <div class="advisor-card"><strong>Retirement Planning</strong><span>Learn the basics of long-term compounding, pension contributions, and time horizon.</span></div>
-        <div class="advisor-card"><strong>Tax Efficiency</strong><span>Understand questions to research around ISAs, pensions, and account choice. Tax rules depend on location.</span></div>
-        <div class="advisor-card"><strong>Protection</strong><span>Learn why insurance, emergency savings, and downside planning matter before chasing returns.</span></div>
+        <div class="advisor-card" role="button" tabindex="0" onclick="send('Explain how to start investing as a complete beginner: what order should I do things in, and what are the biggest mistakes to avoid?')">
+          <strong>Investing 101</strong>
+          <span>ETFs, stocks, pensions, ISAs — where to start and what order matters.</span>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">Click to ask AI →</div>
+        </div>
+        <div class="advisor-card" role="button" tabindex="0" onclick="send('What is a good emergency fund strategy? How many months of expenses, where should I keep it, and when should I invest vs save more?')">
+          <strong>Emergency Fund</strong>
+          <span>How much, where to keep it, and when it is big enough to start investing.</span>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">Click to ask AI →</div>
+        </div>
+        <div class="advisor-card" role="button" tabindex="0" onclick="send('Explain concentration risk and diversification in a portfolio. How do I know if I am too exposed to one sector or stock? What are typical guardrails?')">
+          <strong>Risk Management</strong>
+          <span>Concentration, sector limits, volatility — know your exposure before buying.</span>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">Click to ask AI →</div>
+        </div>
+        <div class="advisor-card" role="button" tabindex="0" onclick="send('Explain compounding for long-term retirement savings. How does starting earlier change outcomes? What is the difference between a pension and an ISA?')">
+          <strong>Retirement</strong>
+          <span>Compounding, pensions, ISAs — why starting early changes everything.</span>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">Click to ask AI →</div>
+        </div>
+        <div class="advisor-card" role="button" tabindex="0" onclick="send('What tax-efficient accounts should a UK or US investor research — ISAs, SIPPs, 401k, Roth IRA? What questions should I ask a tax adviser?')">
+          <strong>Tax Efficiency</strong>
+          <span>ISAs, pensions, 401k — the right accounts cut your tax bill legally.</span>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">Click to ask AI →</div>
+        </div>
+        <div class="advisor-card" role="button" tabindex="0" onclick="send('I want to use the pre-trade preview tool. Walk me through how to use it to check a hypothetical trade before I make it, and what the risk scores mean.')">
+          <strong>Pre-Trade Preview</strong>
+          <span>Simulate a buy before committing — check rules and concentration impact.</span>
+          <div style="margin-top:8px;font-size:11px;color:var(--accent)">Click to ask AI →</div>
+        </div>
+      </div>
+
+      <div class="advisor-panel advisor-warning" style="margin-top:12px;padding:14px 18px;border-radius:12px">
+        <div class="starter-kicker" style="margin-bottom:6px">Educational Only</div>
+        <p style="margin:0;font-size:13px;color:var(--muted)">This tool is not regulated financial advice and cannot guarantee returns. It does not know your full circumstances. Use it to learn and prepare better questions before making real decisions.</p>
       </div>
     </div>
 
@@ -1963,6 +2113,10 @@ function switchTab(name, btn) {
     if (_portfolio) populateInsights(_portfolio);
     loadRules();
   }
+  if (name === 'advisor') {
+    if (_quizAnswers.every(a => a === null)) renderQuiz();
+    calculateGoal();
+  }
 }
 
 // ── Insights ──────────────────────────────────────────────────────────────────
@@ -2370,6 +2524,358 @@ async function loadHistory() {
       }
     });
   } catch (e) { console.error('History load error:', e); }
+}
+
+loadPortfolio();
+setInterval(loadPortfolio, 90000);
+
+// ── Financial Advisor: Risk Quiz ──────────────────────────────────────────────
+
+const QUIZ_QUESTIONS = [
+  {
+    q: "How would you feel if your portfolio dropped 20% in a month?",
+    opts: [
+      { label: "Sell immediately", hint: "I can't stomach big losses" },
+      { label: "Wait and see", hint: "I'd be worried but hold on" },
+      { label: "Stay the course", hint: "I'd trust my long-term plan" },
+      { label: "Buy more", hint: "I'd see it as a discount" },
+    ],
+  },
+  {
+    q: "When do you plan to use this money?",
+    opts: [
+      { label: "Within 2 years", hint: "Short-term — safety matters most" },
+      { label: "2–5 years", hint: "Medium-term — some growth needed" },
+      { label: "5–10 years", hint: "Long-term — growth over safety" },
+      { label: "10+ years away", hint: "Very long — ride out downturns" },
+    ],
+  },
+  {
+    q: "Which best describes your main goal?",
+    opts: [
+      { label: "Protect capital", hint: "Don't lose what I have" },
+      { label: "Steady growth", hint: "Modest, reliable returns" },
+      { label: "Balance both", hint: "Mix of growth and safety" },
+      { label: "Maximise returns", hint: "I accept higher swings" },
+    ],
+  },
+  {
+    q: "How much investing experience do you have?",
+    opts: [
+      { label: "None", hint: "Completely new to this" },
+      { label: "Some savings", hint: "I've used funds or ISAs" },
+      { label: "Stocks & ETFs", hint: "I understand the basics" },
+      { label: "Active investor", hint: "I research and manage positions" },
+    ],
+  },
+];
+
+const PROFILES = {
+  Conservative: {
+    emoji: "🛡️",
+    color: "#38bdf8",
+    desc: "You prefer stability over high returns. Focus on bonds, broad market ETFs, and cash-like instruments with low volatility.",
+    allocation: [
+      { label: "Bonds / Cash", pct: 50, color: "#38bdf8" },
+      { label: "Broad ETFs",   pct: 30, color: "#818cf8" },
+      { label: "Equities",     pct: 20, color: "#34d399" },
+    ],
+    ideas: [
+      { ticker: "BND",  note: "Total bond market ETF — steady income, lower volatility" },
+      { ticker: "SGOV", note: "Short-term govt bonds — near-cash stability" },
+      { ticker: "VTI",  note: "Total US market ETF — broad diversification as your equity slice" },
+    ],
+    prompt: "I am a conservative investor who prefers stability. What ETFs and bonds should I research for a low-risk, diversified portfolio? Explain the risks of each suggestion.",
+  },
+  Balanced: {
+    emoji: "⚖️",
+    color: "#818cf8",
+    desc: "You want growth with guardrails. A mix of broad equity ETFs and defensive assets suits you.",
+    allocation: [
+      { label: "Broad ETFs",  pct: 45, color: "#38bdf8" },
+      { label: "Bonds",       pct: 25, color: "#818cf8" },
+      { label: "Sector ETFs", pct: 20, color: "#34d399" },
+      { label: "Cash",        pct: 10, color: "#fb923c" },
+    ],
+    ideas: [
+      { ticker: "VTI",  note: "Core broad US market — stable growth engine" },
+      { ticker: "VXUS", note: "International exposure — reduces US concentration" },
+      { ticker: "BND",  note: "Bond allocation — smooths volatility during downturns" },
+    ],
+    prompt: "I am a balanced investor aiming for steady growth with some downside protection. Suggest a research starting point for ETFs and bonds, and explain how to think about rebalancing.",
+  },
+  Growth: {
+    emoji: "📈",
+    color: "#34d399",
+    desc: "You're comfortable with market swings in pursuit of stronger long-term returns. Time is your biggest asset.",
+    allocation: [
+      { label: "US Equities",   pct: 55, color: "#38bdf8" },
+      { label: "Intl Equities", pct: 20, color: "#818cf8" },
+      { label: "Sector ETFs",   pct: 15, color: "#34d399" },
+      { label: "Bonds",         pct: 10, color: "#fb923c" },
+    ],
+    ideas: [
+      { ticker: "QQQ",  note: "Nasdaq 100 — tech-heavy growth ETF" },
+      { ticker: "VGT",  note: "Technology sector ETF — direct tech exposure" },
+      { ticker: "VXUS", note: "International diversification alongside US growth" },
+    ],
+    prompt: "I am a growth investor with a long time horizon. What sectors and ETFs should I research for strong long-term growth? What concentration risks should I monitor?",
+  },
+  Aggressive: {
+    emoji: "🚀",
+    color: "#fb923c",
+    desc: "You prioritise maximum long-term growth and can stomach sharp drawdowns. High conviction, high concentration.",
+    allocation: [
+      { label: "Growth Stocks", pct: 60, color: "#38bdf8" },
+      { label: "Sector ETFs",   pct: 25, color: "#818cf8" },
+      { label: "Small/Mid Cap", pct: 15, color: "#34d399" },
+    ],
+    ideas: [
+      { ticker: "NVDA", note: "AI & GPU leader — high growth, high volatility" },
+      { ticker: "ARKK", note: "Disruptive innovation ETF — speculative, diverse themes" },
+      { ticker: "SMH",  note: "Semiconductor ETF — broad chip sector exposure" },
+    ],
+    prompt: "I am an aggressive investor focused on maximum growth. What high-growth stocks and ETFs should I research? What are the biggest risks I need to monitor with this approach?",
+  },
+};
+
+let _quizAnswers = [null, null, null, null];
+let _quizStep = 0;
+let _quizProfile = null;
+let _goalType = 'house';
+let _goalChart = null;
+
+function _scoreToProfile(answers) {
+  const total = answers.reduce((s, v) => s + (v || 0), 0);
+  if (total <= 3)  return 'Conservative';
+  if (total <= 6)  return 'Balanced';
+  if (total <= 9)  return 'Growth';
+  return 'Aggressive';
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quiz-container');
+  const label = document.getElementById('quiz-progress-label');
+  if (!container) return;
+
+  if (_quizProfile) {
+    renderQuizResult(_quizProfile);
+    return;
+  }
+
+  const q = QUIZ_QUESTIONS[_quizStep];
+  label.textContent = `Question ${_quizStep + 1} of ${QUIZ_QUESTIONS.length}`;
+
+  const dots = QUIZ_QUESTIONS.map((_, i) => {
+    const cls = i < _quizStep ? 'quiz-dot done' : i === _quizStep ? 'quiz-dot active' : 'quiz-dot';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  const opts = q.opts.map((o, i) => {
+    const sel = _quizAnswers[_quizStep] === i ? 'selected' : '';
+    return `<button class="quiz-option ${sel}" onclick="selectQuizOption(${i})">
+      <div class="quiz-option-label">${o.label}</div>
+      <div class="quiz-option-hint">${o.hint}</div>
+    </button>`;
+  }).join('');
+
+  const canNext = _quizAnswers[_quizStep] !== null;
+  const isLast = _quizStep === QUIZ_QUESTIONS.length - 1;
+
+  container.innerHTML = `
+    <div class="quiz-dots">${dots}</div>
+    <div class="quiz-q">
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-options">${opts}</div>
+    </div>
+    <div class="quiz-nav">
+      ${_quizStep > 0 ? `<button class="gen-btn" style="background:var(--surface2);color:var(--text)" onclick="quizBack()">← Back</button>` : '<span></span>'}
+      <button class="gen-btn" ${canNext ? '' : 'disabled style="opacity:.4;cursor:default"'} onclick="quizNext()">
+        ${isLast ? 'See My Profile →' : 'Next →'}
+      </button>
+    </div>`;
+}
+
+function selectQuizOption(idx) {
+  _quizAnswers[_quizStep] = idx;
+  renderQuiz();
+}
+
+function quizNext() {
+  if (_quizAnswers[_quizStep] === null) return;
+  if (_quizStep < QUIZ_QUESTIONS.length - 1) {
+    _quizStep++;
+    renderQuiz();
+  } else {
+    _quizProfile = _scoreToProfile(_quizAnswers);
+    document.getElementById('quiz-progress-label').textContent = 'Your profile';
+    renderQuizResult(_quizProfile);
+  }
+}
+
+function quizBack() {
+  if (_quizStep > 0) { _quizStep--; renderQuiz(); }
+}
+
+function resetQuiz() {
+  _quizAnswers = [null, null, null, null];
+  _quizStep = 0;
+  _quizProfile = null;
+  document.getElementById('quiz-progress-label').textContent = 'Question 1 of 4';
+  renderQuiz();
+}
+
+function renderQuizResult(profileName) {
+  const container = document.getElementById('quiz-container');
+  const p = PROFILES[profileName];
+
+  const barSegs = p.allocation.map(a =>
+    `<div class="alloc-seg" style="width:${a.pct}%;background:${a.color}" title="${a.label} ${a.pct}%"></div>`
+  ).join('');
+  const legend = p.allocation.map(a =>
+    `<div class="alloc-dot-item"><span class="alloc-dot" style="background:${a.color}"></span>${a.label} ${a.pct}%</div>`
+  ).join('');
+  const ideas = p.ideas.map(idea =>
+    `<div class="profile-idea">
+      <div class="profile-idea-ticker">${idea.ticker}</div>
+      <div class="profile-idea-note">${idea.note}</div>
+    </div>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="profile-result">
+      <div class="profile-badge" style="background:color-mix(in srgb,${p.color} 18%,var(--surface2))">${p.emoji}</div>
+      <div>
+        <div class="profile-name">${profileName} Investor</div>
+        <div class="profile-desc">${p.desc}</div>
+      </div>
+    </div>
+    <div style="padding:0 22px 10px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.04em;text-transform:uppercase">Suggested Allocation</div>
+      <div class="allocation-bar">${barSegs}</div>
+      <div class="alloc-legend">${legend}</div>
+    </div>
+    <div style="padding:0 22px 14px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase">Research Ideas</div>
+      <div class="profile-ideas">${ideas}</div>
+    </div>
+    <div class="profile-actions">
+      <button class="gen-btn" onclick="send(${JSON.stringify(p.prompt)})">Ask AI for ${profileName} advice</button>
+      <button class="gen-btn" style="background:var(--surface2);color:var(--text)" onclick="resetQuiz()">Retake quiz</button>
+    </div>`;
+}
+
+// ── Financial Advisor: Goal Planner ───────────────────────────────────────────
+
+const GOAL_DEFAULTS = {
+  house:      { label: 'House Deposit',  target: 50000,  monthly: 800,  ret: 5,  start: 2000 },
+  emergency:  { label: 'Emergency Fund', target: 10000,  monthly: 300,  ret: 2,  start: 500 },
+  retirement: { label: 'Retirement',     target: 500000, monthly: 500,  ret: 7,  start: 5000 },
+  car:        { label: 'Car / Other',    target: 15000,  monthly: 400,  ret: 4,  start: 0 },
+};
+
+function selectGoal(type, btn) {
+  _goalType = type;
+  document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = GOAL_DEFAULTS[type];
+  document.getElementById('goal-target').value  = d.target;
+  document.getElementById('goal-monthly').value  = d.monthly;
+  document.getElementById('goal-return').value   = d.ret;
+  document.getElementById('goal-start').value    = d.start;
+  calculateGoal();
+}
+
+function calculateGoal() {
+  const FV      = parseFloat(document.getElementById('goal-target').value)  || 0;
+  const PMT     = parseFloat(document.getElementById('goal-monthly').value)  || 0;
+  const annRate = parseFloat(document.getElementById('goal-return').value)   || 0;
+  const PV      = parseFloat(document.getElementById('goal-start').value)    || 0;
+  if (FV <= 0 || PMT <= 0) return;
+
+  const r = annRate / 100 / 12;
+  let months;
+  if (r === 0) {
+    months = Math.ceil((FV - PV) / PMT);
+  } else {
+    const remaining = FV - PV * Math.pow(1 + r, 1);
+    if (remaining <= 0) { months = 0; }
+    else {
+      months = Math.ceil(Math.log(1 + remaining * r / PMT) / Math.log(1 + r));
+    }
+  }
+  if (!isFinite(months) || months < 0) months = 999;
+
+  const years = Math.floor(months / 12);
+  const remMo = months % 12;
+  const timeStr = years > 0
+    ? `${years}y ${remMo > 0 ? remMo + 'm' : ''}`.trim()
+    : `${months} mo`;
+
+  const contributed = PMT * months + PV;
+  const growth = FV - contributed;
+
+  document.getElementById('gr-time').textContent        = timeStr;
+  document.getElementById('gr-contributed').textContent = '$' + Math.round(contributed).toLocaleString();
+  document.getElementById('gr-growth').textContent      = '$' + Math.round(Math.max(0, growth)).toLocaleString();
+  document.getElementById('gr-total').textContent       = '$' + Math.round(FV).toLocaleString();
+
+  _renderGoalChart(months, PMT, r, PV, FV);
+}
+
+function _renderGoalChart(months, PMT, r, PV, FV) {
+  const canvas = document.getElementById('goal-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const steps = Math.min(months, 120);
+  const labels = [];
+  const contributed = [];
+  const total = [];
+  let cum = PV;
+  for (let i = 0; i <= steps; i++) {
+    const mo = Math.round(i * months / steps);
+    labels.push(mo < 12 ? mo + 'mo' : Math.round(mo / 12) + 'y');
+    if (r === 0) {
+      cum = PV + PMT * mo;
+    } else {
+      cum = PV * Math.pow(1 + r, mo) + PMT * (Math.pow(1 + r, mo) - 1) / r;
+    }
+    contributed.push(Math.min(PV + PMT * mo, FV));
+    total.push(Math.min(Math.round(cum), FV * 1.02));
+  }
+
+  if (_goalChart) { _goalChart.destroy(); _goalChart = null; }
+  _goalChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Total value', data: total, borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,.12)', fill: true, tension: 0.4, pointRadius: 0 },
+        { label: 'Contributions', data: contributed, borderColor: '#818cf8', backgroundColor: 'transparent', borderDash: [4,3], tension: 0.4, pointRadius: 0 },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: 'var(--muted)', boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => '$' + Math.round(ctx.parsed.y).toLocaleString() } },
+      },
+      scales: {
+        x: { ticks: { color: 'var(--muted)', font: { size: 10 }, maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: 'var(--muted)', font: { size: 10 }, callback: v => '$' + (v >= 1000 ? Math.round(v/1000) + 'k' : v) }, grid: { color: 'rgba(255,255,255,.04)' } },
+      },
+    },
+  });
+}
+
+function askAboutGoal() {
+  const FV  = document.getElementById('goal-target').value;
+  const PMT = document.getElementById('goal-monthly').value;
+  const ret = document.getElementById('goal-return').value;
+  const PV  = document.getElementById('goal-start').value;
+  const goalLabel = GOAL_DEFAULTS[_goalType]?.label || 'my goal';
+  const prompt = `I am saving for ${goalLabel}. My target is $${FV}, I can save $${PMT} per month, I have $${PV} already, and I expect ${ret}% annual return. What advice do you have to reach this goal faster, and what risks should I be aware of?`;
+  send(prompt);
 }
 
 loadPortfolio();
