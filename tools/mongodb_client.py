@@ -166,3 +166,12 @@ def seed_demo_portfolio(user_id: str):
     upsert_rule(user_id, "min_sectors", "At least 4 sectors", {"min_count": 4})
 
     return {"status": "ok", "holdings": len(holdings), "watchlist": 3, "rules": 3}
+
+
+def reset_beginner_portfolio(user_id: str):
+    """Reset the demo user to a blank beginner state."""
+    db = _db()
+    for name in ("holdings", "watchlist", "rules", "snapshots", "transactions"):
+        db[name].delete_many({"user_id": user_id})
+
+    return {"status": "ok", "holdings": 0, "watchlist": 0, "rules": 0}

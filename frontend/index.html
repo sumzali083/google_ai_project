@@ -989,7 +989,8 @@ tbody tr:hover td { background: var(--surface2); }
       <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
       <button class="tab-btn" onclick="switchTab('watchlist', this)">Watchlist</button>
       <button class="tab-btn" onclick="switchTab('insights', this)">Insights</button>
-      <button class="tab-btn" onclick="seedDemoPortfolio()">Demo Mode</button>
+      <button class="tab-btn" onclick="seedDemoPortfolio()">Demo with values</button>
+      <button class="tab-btn" onclick="resetBeginnerPortfolio()">Start from scratch</button>
     </div>
 
     <!-- ── Overview ── -->
@@ -1560,7 +1561,13 @@ function updateRiskChart(d) {
     });
   });
 
-  if (!rows.length) return;
+  if (!rows.length) {
+    if (riskChart) {
+      riskChart.destroy();
+      riskChart = null;
+    }
+    return;
+  }
 
   const text2 = getComputedStyle(html).getPropertyValue('--text2').trim();
   const border = getComputedStyle(html).getPropertyValue('--border').trim();
@@ -1840,11 +1847,43 @@ async function seedDemoPortfolio() {
   }
 }
 
+async function resetBeginnerPortfolio() {
+  $('agent-step-ai').textContent = 'Starting from a blank beginner portfolio...';
+  $('agent-step-db').textContent = 'Clearing MongoDB holdings, rules, watchlist, and snapshots.';
+  $('agent-step-market').textContent = 'No live prices needed until you add research ideas.';
+  try {
+    const res = await fetch('/api/demo/reset', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    bubble('Blank beginner mode loaded. Use Start Here to research ideas, save a watchlist, then preview trades before adding holdings.', 'ai');
+    await loadPortfolio();
+    await loadWatchlistMini();
+    await loadMemorySummary();
+    if (!document.getElementById('tab-watchlist').classList.contains('hidden')) {
+      loadWatchlistFull();
+    }
+    if (!document.getElementById('tab-insights').classList.contains('hidden')) {
+      loadRules();
+    }
+  } catch (e) {
+    bubble('Start from scratch failed - check the server logs.', 'err');
+    $('agent-step-ai').textContent = 'Start from scratch failed.';
+  }
+}
+
 function populateInsights(d) {
   const holdings = d.holdings || [];
   const sectors  = Array.isArray(d.allocation_by_sector) ? d.allocation_by_sector : [];
 
-  if (!holdings.length) return;
+  if (!holdings.length) {
+    ['ins-top-ticker', 'ins-best-ticker', 'ins-worst-ticker', 'ins-sector-name'].forEach(id => $(id).textContent = '--');
+    ['ins-top-val', 'ins-best-val', 'ins-worst-val', 'ins-sector-val'].forEach(id => {
+      $(id).textContent = '--';
+      $(id).className = 'ins-val';
+    });
+    ['ins-top-sub', 'ins-best-sub', 'ins-worst-sub', 'ins-sector-sub'].forEach(id => $(id).textContent = 'Start from scratch, then add holdings or watchlist ideas.');
+    return;
+  }
 
   // Most invested by market value
   const top = [...holdings].sort((a, b) => b.market_value - a.market_value)[0];

@@ -193,6 +193,12 @@ def seed_demo():
     return jsonify(result)
 
 
+@app.route("/api/demo/reset", methods=["POST"])
+def reset_demo():
+    result = mongodb_client.reset_beginner_portfolio(USER_ID)
+    return jsonify(result)
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
