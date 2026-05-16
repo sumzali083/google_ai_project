@@ -744,6 +744,41 @@ tbody tr:hover td { background: var(--surface2); }
 }
 .research-btn:hover { background: var(--accent); color: #fff; }
 
+.starter-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  background: linear-gradient(135deg, var(--surface), var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+}
+
+.starter-hero h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.starter-hero p {
+  max-width: 780px;
+  color: var(--text2);
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.starter-hero-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .starter-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -783,19 +818,47 @@ tbody tr:hover td { background: var(--surface2); }
 
 .idea-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
   padding: 16px 18px;
+}
+
+.idea-lane {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.idea-lane-head {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.idea-lane-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.idea-lane-copy {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
 }
 
 .idea-card {
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 14px;
-  background: var(--bg);
+  padding: 13px;
+  background: var(--surface);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin: 12px;
 }
 
 .idea-head {
@@ -827,6 +890,29 @@ tbody tr:hover td { background: var(--surface2); }
   color: var(--text2);
   font-size: 12.5px;
   line-height: 1.5;
+}
+
+.idea-meta {
+  display: grid;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text2);
+}
+
+.idea-meta span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.idea-meta strong {
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: .5px;
 }
 
 .starter-actions {
@@ -867,6 +953,8 @@ tbody tr:hover td { background: var(--surface2); }
 
 @media (max-width: 900px) {
   .ins-grid { grid-template-columns: repeat(2, 1fr); }
+  .starter-hero { grid-template-columns: 1fr; }
+  .starter-hero-actions { justify-content: flex-start; }
   .starter-grid, .idea-grid { grid-template-columns: 1fr; }
 }
 </style>
@@ -906,21 +994,32 @@ tbody tr:hover td { background: var(--surface2); }
 
     <!-- ── Overview ── -->
     <div id="tab-start" class="tab-pane hidden">
+      <div class="starter-hero">
+        <div>
+          <h2>New to investing? Start with research, not guesses.</h2>
+          <p>PortfolioAI groups ideas by why a beginner might look at them: what has momentum, what is usually used as a steadier core, and what the AI thinks is worth researching next. Nothing here is a buy signal; every idea has a risk check before it reaches your watchlist.</p>
+        </div>
+        <div class="starter-hero-actions">
+          <button class="gen-btn" onclick="send('I am starting from zero. Build me a beginner-friendly research plan with core funds, trend ideas, steadier options, and risks to check. Do not give buy or sell advice.')">Ask AI for a Plan</button>
+          <button class="gen-btn" onclick="send('What investments have had strong momentum recently, and what risks should a beginner check before researching them?')">Momentum Brief</button>
+        </div>
+      </div>
+
       <div class="starter-grid">
         <div class="starter-card">
-          <div class="starter-kicker">Beginner Goal</div>
-          <div class="starter-title">Build a base first</div>
-          <div class="starter-copy">Research broad funds before individual hype stocks. Broad funds can spread risk across hundreds or thousands of companies.</div>
+          <div class="starter-kicker">Going Up</div>
+          <div class="starter-title">Momentum is a clue</div>
+          <div class="starter-copy">The app can point you toward popular momentum themes, then asks Gemini to explain why they rose and what could go wrong.</div>
         </div>
         <div class="starter-card">
-          <div class="starter-kicker">Risk Rule</div>
-          <div class="starter-title">Avoid one-stock bets</div>
-          <div class="starter-copy">PortfolioAI flags concentration so beginners can see when one ticker or one sector carries too much of the portfolio.</div>
+          <div class="starter-kicker">Considered Safer</div>
+          <div class="starter-title">Core before hype</div>
+          <div class="starter-copy">Broad funds and bond funds are not risk-free, but they are common starting points for learning diversification.</div>
         </div>
         <div class="starter-card">
-          <div class="starter-kicker">AI Guardrail</div>
-          <div class="starter-title">Ask before adding</div>
-          <div class="starter-copy">Ask Gemini what an investment is, why people watch it, and what risks to check before saving it to your watchlist.</div>
+          <div class="starter-kicker">AI Outlook</div>
+          <div class="starter-title">Thesis, not prediction</div>
+          <div class="starter-copy">Gemini can explain the bull case, bear case, and portfolio fit without pretending it knows the future.</div>
         </div>
       </div>
 
@@ -1257,32 +1356,74 @@ const STARTER_IDEAS = [
   {
     ticker: 'VTI',
     tag: 'Broad Core',
+    lane: 'Considered steadier',
+    laneNote: 'Common beginner research ideas for diversification and risk control.',
+    risk: 'Medium',
+    check: 'Fees, overlap, and whether US-only exposure is enough.',
     note: 'A total US market ETF to research as a diversified starting point instead of picking one company.',
   },
   {
     ticker: 'SPY',
     tag: 'Large Companies',
+    lane: 'Considered steadier',
+    laneNote: 'Common beginner research ideas for diversification and risk control.',
+    risk: 'Medium',
+    check: 'Valuation, concentration in mega-cap tech, and fees.',
     note: 'Tracks the S&P 500, often used as a simple benchmark for major US stocks.',
   },
   {
     ticker: 'BND',
     tag: 'Stability',
+    lane: 'Considered steadier',
+    laneNote: 'Common beginner research ideas for diversification and risk control.',
+    risk: 'Lower',
+    check: 'Interest-rate risk and whether bonds fit your time horizon.',
     note: 'A bond ETF to research when learning how lower-volatility assets can balance stock risk.',
   },
   {
     ticker: 'XLV',
     tag: 'Healthcare',
+    lane: 'AI outlook',
+    laneNote: 'Portfolio-fit ideas where Gemini can explain the thesis and the risks.',
+    risk: 'Medium',
+    check: 'Policy risk, valuation, and whether it diversifies your current sectors.',
     note: 'A sector ETF to research if your portfolio is too concentrated in technology.',
   },
   {
     ticker: 'NVDA',
     tag: 'AI Trend',
+    lane: 'Going up lately',
+    laneNote: 'Momentum ideas people often watch, with extra risk checks before adding.',
+    risk: 'High',
+    check: 'Valuation, volatility, and whether you already own too much tech.',
     note: 'A popular AI-related stock to research carefully because trend stocks can be volatile.',
   },
   {
     ticker: 'TSLA',
     tag: 'High Volatility',
+    lane: 'Going up lately',
+    laneNote: 'Momentum ideas people often watch, with extra risk checks before adding.',
+    risk: 'High',
+    check: 'Volatility, earnings quality, and whether the price already reflects the story.',
     note: 'A commonly watched growth stock. Good for learning how hype, risk, and valuation interact.',
+  },
+  {
+    ticker: 'MSFT',
+    tag: 'AI Infrastructure',
+    lane: 'AI outlook',
+    laneNote: 'Portfolio-fit ideas where Gemini can explain the thesis and the risks.',
+    risk: 'Medium',
+    check: 'Cloud growth, AI costs, valuation, and portfolio tech concentration.',
+    note: 'A large profitable tech company often researched as an AI infrastructure theme.',
+  },
+  {
+    ticker: 'GLD',
+    tag: 'Defensive Asset',
+    lane: 'Considered steadier',
+    laneNote: 'Common beginner research ideas for diversification and risk control.',
+    risk: 'Medium',
+    check: 'No income, commodity swings, and whether it actually reduces portfolio risk.',
+    note: 'A gold ETF to research as a possible diversifier when stocks are volatile.',
   },
 ];
 
@@ -1318,22 +1459,41 @@ function escapeAttr(value) {
 function renderStarterIdeas() {
   const wrap = $('starter-ideas');
   if (!wrap) return;
-  wrap.innerHTML = STARTER_IDEAS.map(idea => {
-    const ticker = escapeHtml(idea.ticker);
-    const tag = escapeHtml(idea.tag);
-    const note = escapeHtml(idea.note);
-    const askPrompt = `I am starting from zero. Explain ${idea.ticker} in beginner-friendly terms: what it is, why people research it, what risks to check, and whether it helps diversification. Do not give buy or sell advice.`;
-    const savePrompt = `Add ${idea.ticker} to my watchlist with note: ${idea.tag} - beginner research idea`;
-    return `<div class="idea-card">
-      <div class="idea-head">
-        <span class="idea-ticker">${ticker}</span>
-        <span class="idea-tag">${tag}</span>
+  const lanes = ['Going up lately', 'Considered steadier', 'AI outlook'];
+  wrap.innerHTML = lanes.map(lane => {
+    const ideas = STARTER_IDEAS.filter(idea => idea.lane === lane);
+    const laneNote = ideas[0]?.laneNote || '';
+    const cards = ideas.map(idea => {
+      const ticker = escapeHtml(idea.ticker);
+      const tag = escapeHtml(idea.tag);
+      const note = escapeHtml(idea.note);
+      const risk = escapeHtml(idea.risk);
+      const check = escapeHtml(idea.check);
+      const askPrompt = `I am starting from zero. Explain ${idea.ticker} in beginner-friendly terms. Cover: what it is, whether it has momentum, why people may research it, the bull case, the bear case, what risk level it has, and what to check before adding it to my watchlist. Do not give buy or sell advice and do not promise future returns.`;
+      const savePrompt = `Add ${idea.ticker} to my watchlist with note: ${idea.tag} - beginner research idea`;
+      return `<div class="idea-card">
+        <div class="idea-head">
+          <span class="idea-ticker">${ticker}</span>
+          <span class="idea-tag">${tag}</span>
+        </div>
+        <div class="idea-copy">${note}</div>
+        <div class="idea-meta">
+          <span><strong>Risk</strong>${risk}</span>
+          <span><strong>Check</strong>${check}</span>
+        </div>
+        <div class="starter-actions">
+          <button class="research-btn" onclick="send('${escapeAttr(askPrompt)}')">Ask AI</button>
+          <button class="research-btn" onclick="send('${escapeAttr(savePrompt)}')">Add to Watchlist</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="idea-lane">
+      <div class="idea-lane-head">
+        <div class="idea-lane-title">${escapeHtml(lane)}</div>
+        <div class="idea-lane-copy">${escapeHtml(laneNote)}</div>
       </div>
-      <div class="idea-copy">${note}</div>
-      <div class="starter-actions">
-        <button class="research-btn" onclick="send('${escapeAttr(askPrompt)}')">Ask AI</button>
-        <button class="research-btn" onclick="send('${escapeAttr(savePrompt)}')">Add to Watchlist</button>
-      </div>
+      ${cards}
     </div>`;
   }).join('');
 }
