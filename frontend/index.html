@@ -744,8 +744,130 @@ tbody tr:hover td { background: var(--surface2); }
 }
 .research-btn:hover { background: var(--accent); color: #fff; }
 
+.starter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.starter-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+
+.starter-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.starter-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.starter-copy {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text2);
+}
+
+.idea-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.idea-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.idea-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.idea-ticker {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.idea-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(213, 117, 0, .25);
+  border-radius: 999px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.idea-copy {
+  color: var(--text2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.starter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.plan-list {
+  padding: 14px 18px 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.plan-step {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.plan-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.plan-text strong { display: block; color: var(--text); font-size: 13px; margin-bottom: 2px; }
+.plan-text span { color: var(--text2); font-size: 12.5px; line-height: 1.45; }
+
 @media (max-width: 900px) {
   .ins-grid { grid-template-columns: repeat(2, 1fr); }
+  .starter-grid, .idea-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -775,6 +897,7 @@ tbody tr:hover td { background: var(--surface2); }
   <div class="dash">
     <!-- Tab bar -->
     <div class="tab-bar">
+      <button class="tab-btn" onclick="switchTab('start', this)">Start Here</button>
       <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
       <button class="tab-btn" onclick="switchTab('watchlist', this)">Watchlist</button>
       <button class="tab-btn" onclick="switchTab('insights', this)">Insights</button>
@@ -782,6 +905,59 @@ tbody tr:hover td { background: var(--surface2); }
     </div>
 
     <!-- ── Overview ── -->
+    <div id="tab-start" class="tab-pane hidden">
+      <div class="starter-grid">
+        <div class="starter-card">
+          <div class="starter-kicker">Beginner Goal</div>
+          <div class="starter-title">Build a base first</div>
+          <div class="starter-copy">Research broad funds before individual hype stocks. Broad funds can spread risk across hundreds or thousands of companies.</div>
+        </div>
+        <div class="starter-card">
+          <div class="starter-kicker">Risk Rule</div>
+          <div class="starter-title">Avoid one-stock bets</div>
+          <div class="starter-copy">PortfolioAI flags concentration so beginners can see when one ticker or one sector carries too much of the portfolio.</div>
+        </div>
+        <div class="starter-card">
+          <div class="starter-kicker">AI Guardrail</div>
+          <div class="starter-title">Ask before adding</div>
+          <div class="starter-copy">Ask Gemini what an investment is, why people watch it, and what risks to check before saving it to your watchlist.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-title">Where To Start From Zero <span class="info-dot simple-help" tabindex="0" data-tip="Educational starting points to research. These are not instructions to buy.">i</span></span>
+          <span class="card-head-meta">Research only</span>
+        </div>
+        <div class="idea-grid" id="starter-ideas"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-title">Beginner Roadmap</span>
+          <span class="card-head-meta">Plain English</span>
+        </div>
+        <div class="plan-list">
+          <div class="plan-step">
+            <div class="plan-num">1</div>
+            <div class="plan-text"><strong>Research a broad core</strong><span>Look at diversified funds first, then compare them with single stocks.</span></div>
+          </div>
+          <div class="plan-step">
+            <div class="plan-num">2</div>
+            <div class="plan-text"><strong>Add watchlist ideas</strong><span>Save ideas with notes and capture the first-watch price in MongoDB.</span></div>
+          </div>
+          <div class="plan-step">
+            <div class="plan-num">3</div>
+            <div class="plan-text"><strong>Set guardrails</strong><span>Create rules like "no stock over 30%" or "keep at least 4 sectors."</span></div>
+          </div>
+          <div class="plan-step">
+            <div class="plan-num">4</div>
+            <div class="plan-text"><strong>Preview before buying</strong><span>Test the trade first and let the agent flag concentration risks.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="tab-overview" class="tab-pane">
       <div class="stats">
         <div class="stat">
@@ -1041,6 +1217,7 @@ tbody tr:hover td { background: var(--surface2); }
       <span class="chip" onclick="send(this.textContent)">Biggest risks?</span>
       <span class="chip" onclick="send(this.textContent)">Compare to S&amp;P 500</span>
       <span class="chip" onclick="send(this.textContent)">Explain this like I am new to investing</span>
+      <span class="chip" onclick="send(this.textContent)">I am starting from zero, what should I research first?</span>
       <span class="chip" onclick="send(this.textContent)">Suggest research ideas</span>
       <span class="chip" onclick="send(this.textContent)">AAPL price</span>
       <span class="chip" onclick="send(this.textContent)">Save snapshot</span>
@@ -1076,6 +1253,39 @@ const fmt = n => n == null ? '--' : '$' + Number(n).toLocaleString('en-US', { mi
 const pct = n => n == null ? '--' : (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%';
 const cls = n => n >= 0 ? 'pos' : 'neg';
 
+const STARTER_IDEAS = [
+  {
+    ticker: 'VTI',
+    tag: 'Broad Core',
+    note: 'A total US market ETF to research as a diversified starting point instead of picking one company.',
+  },
+  {
+    ticker: 'SPY',
+    tag: 'Large Companies',
+    note: 'Tracks the S&P 500, often used as a simple benchmark for major US stocks.',
+  },
+  {
+    ticker: 'BND',
+    tag: 'Stability',
+    note: 'A bond ETF to research when learning how lower-volatility assets can balance stock risk.',
+  },
+  {
+    ticker: 'XLV',
+    tag: 'Healthcare',
+    note: 'A sector ETF to research if your portfolio is too concentrated in technology.',
+  },
+  {
+    ticker: 'NVDA',
+    tag: 'AI Trend',
+    note: 'A popular AI-related stock to research carefully because trend stocks can be volatile.',
+  },
+  {
+    ticker: 'TSLA',
+    tag: 'High Volatility',
+    note: 'A commonly watched growth stock. Good for learning how hype, risk, and valuation interact.',
+  },
+];
+
 const savedTheme = localStorage.getItem('theme') || 'light';
 setTheme(savedTheme);
 themeBtn.addEventListener('click', () => setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
@@ -1089,6 +1299,7 @@ function setMode(mode) {
 }
 
 setMode(localStorage.getItem('explainMode') || 'simple');
+renderStarterIdeas();
 
 function now() {
   return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -1098,6 +1309,33 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[ch]));
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+function renderStarterIdeas() {
+  const wrap = $('starter-ideas');
+  if (!wrap) return;
+  wrap.innerHTML = STARTER_IDEAS.map(idea => {
+    const ticker = escapeHtml(idea.ticker);
+    const tag = escapeHtml(idea.tag);
+    const note = escapeHtml(idea.note);
+    const askPrompt = `I am starting from zero. Explain ${idea.ticker} in beginner-friendly terms: what it is, why people research it, what risks to check, and whether it helps diversification. Do not give buy or sell advice.`;
+    const savePrompt = `Add ${idea.ticker} to my watchlist with note: ${idea.tag} - beginner research idea`;
+    return `<div class="idea-card">
+      <div class="idea-head">
+        <span class="idea-ticker">${ticker}</span>
+        <span class="idea-tag">${tag}</span>
+      </div>
+      <div class="idea-copy">${note}</div>
+      <div class="starter-actions">
+        <button class="research-btn" onclick="send('${escapeAttr(askPrompt)}')">Ask AI</button>
+        <button class="research-btn" onclick="send('${escapeAttr(savePrompt)}')">Add to Watchlist</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function cleanMarkdown(value) {
