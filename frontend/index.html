@@ -147,6 +147,105 @@ nav {
   min-height: 0;
 }
 
+.agent-hero {
+  display: grid;
+  grid-template-columns: minmax(260px, .9fr) minmax(360px, 1.1fr);
+  gap: 14px;
+  align-items: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--surface2) 78%, var(--bg)), var(--surface));
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.agent-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 7px;
+}
+
+.agent-kicker::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.agent-hero h2 {
+  font-size: 24px;
+  line-height: 1.18;
+  margin-bottom: 8px;
+  letter-spacing: 0;
+}
+
+.agent-hero p {
+  color: var(--text2);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+.agent-hero-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agent-hero-input {
+  display: flex;
+  gap: 8px;
+}
+
+.agent-hero-input input,
+.watchlist-add input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+
+.agent-hero-input input:focus,
+.watchlist-add input:focus { border-color: var(--accent); }
+
+.hero-chip-row,
+.watchlist-add-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.hero-chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+
+.hero-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
 .dash {
   overflow-y: auto;
   padding: 18px 20px 26px;
@@ -526,6 +625,28 @@ tbody tr:hover td { background: var(--surface2); }
   border-radius: 3px;
 }
 
+.bubble table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 12px;
+}
+
+.bubble th,
+.bubble td {
+  border: 1px solid var(--border);
+  padding: 7px 9px;
+  white-space: normal;
+  min-width: 120px;
+}
+
+.bubble th {
+  background: var(--surface2);
+  font-weight: 700;
+}
+
 .bubble.err {
   align-self: flex-start;
   background: var(--risk-bg);
@@ -628,6 +749,7 @@ tbody tr:hover td { background: var(--surface2); }
 @media (max-width: 1120px) {
   body { overflow: auto; height: auto; min-height: 100vh; }
   .layout { grid-template-columns: 1fr; }
+  .agent-hero { grid-template-columns: 1fr; }
   .chat-panel {
     border-left: 0;
     border-top: 1px solid var(--border);
@@ -644,6 +766,10 @@ tbody tr:hover td { background: var(--surface2); }
   .hist-canvas-wrap { height: 120px; }
   .activity-list { grid-template-columns: 1fr; }
   .dash { padding: 14px; }
+  .agent-hero { padding: 14px; }
+  .agent-hero h2 { font-size: 20px; }
+  .agent-hero-input { flex-direction: column; }
+  .agent-hero-input .send-btn { width: 100%; }
   table { min-width: 720px; }
   .card.table-card { overflow-x: auto; }
 }
@@ -680,6 +806,44 @@ tbody tr:hover td { background: var(--surface2); }
 .tab-btn:hover:not(.active) { color: var(--text); }
 .tab-pane { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
 .tab-pane.hidden { display: none; }
+
+.watchlist-add {
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: minmax(220px, .8fr) minmax(120px, .35fr) minmax(240px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.watchlist-add-copy {
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.watchlist-add-copy strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.watchlist-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.watchlist-field label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (max-width: 980px) {
+  .watchlist-add { grid-template-columns: 1fr; }
+}
 
 .demo-menu {
   position: relative;
@@ -1068,7 +1232,7 @@ tbody tr:hover td { background: var(--surface2); }
 .quiz-option-label { font-size: 13px; font-weight: 600; color: var(--text); }
 .quiz-option-hint { font-size: 11px; color: var(--muted); }
 .quiz-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px; border-top: 1px solid var(--border); }
-.quiz-dots { display: flex; gap: 6px; }
+.quiz-dots { display: flex; gap: 6px; align-items: center; }
 .quiz-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); transition: background .2s; }
 .quiz-dot.active { background: var(--accent); }
 .quiz-dot.done { background: var(--green); }
@@ -1348,6 +1512,28 @@ tbody tr:hover td { background: var(--surface2); }
     </div>
 
     <div id="tab-overview" class="tab-pane">
+      <div class="agent-hero">
+        <div>
+          <div class="agent-kicker">PortfolioAI Command Center</div>
+          <h2>Ask the agent before you act.</h2>
+          <p>Use plain English to understand risk, save watchlist ideas, or preview a trade. The dashboard updates from MongoDB memory after the agent acts.</p>
+        </div>
+        <div class="agent-hero-box">
+          <div class="agent-hero-input">
+            <input id="hero-inp" type="text" placeholder="Ask: I am starting from zero, what should I research first?" autocomplete="off" />
+            <button class="send-btn" onclick="sendFromHero()" aria-label="Ask PortfolioAI">
+              <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+          </div>
+          <div class="hero-chip-row">
+            <button class="hero-chip" onclick="sendFromHero('I am starting from zero, what should I research first?')">Starter plan</button>
+            <button class="hero-chip" onclick="sendFromHero('What are my biggest risks?')">Biggest risks</button>
+            <button class="hero-chip" onclick="sendFromHero('Add VTI to my watchlist with note: broad market core fund to research')">Save VTI idea</button>
+            <button class="hero-chip" onclick="sendFromHero('Preview buying 10 shares of NVDA at the current price')">Preview NVDA</button>
+          </div>
+        </div>
+      </div>
+
       <div class="stats">
         <div class="stat">
           <div class="stat-label">Total Value</div>
@@ -1462,6 +1648,21 @@ tbody tr:hover td { background: var(--surface2); }
 
     <!-- ── Watchlist ── -->
     <div id="tab-watchlist" class="tab-pane hidden">
+      <div class="watchlist-add card">
+        <div class="watchlist-add-copy">
+          <strong>Save a research idea</strong>
+          Track stocks or ETFs you are curious about. PortfolioAI captures the current price so you can see what happened later.
+        </div>
+        <div class="watchlist-field">
+          <label for="wl-add-ticker">Ticker</label>
+          <input id="wl-add-ticker" type="text" placeholder="VTI" autocomplete="off" />
+        </div>
+        <div class="watchlist-field">
+          <label for="wl-add-note">Reason to watch</label>
+          <input id="wl-add-note" type="text" placeholder="Broad market core fund to research" autocomplete="off" />
+        </div>
+        <button class="gen-btn" id="wl-add-btn" onclick="addWatchlistFromForm()">Save to Watchlist</button>
+      </div>
       <div class="card table-card">
         <div class="card-head">
           <span class="card-head-title">Watchlist <span class="info-dot simple-help" tabindex="0" data-tip="Stocks or ETFs saved as research ideas. They are not recommendations to buy.">i</span></span>
@@ -1483,7 +1684,7 @@ tbody tr:hover td { background: var(--surface2); }
           </tbody>
         </table>
       </div>
-      <p class="wl-hint">Tell the agent: "Add NVDA to my watchlist with note: potential buy on dip" - price is captured automatically so you can track what you missed.</p>
+      <p class="wl-hint">You can also tell the agent: "Add NVDA to my watchlist with note: potential buy on dip". Saved ideas are educational research notes, not buy recommendations.</p>
     </div>
 
     <!-- ── Insights ── -->
@@ -1598,7 +1799,7 @@ tbody tr:hover td { background: var(--surface2); }
     </div>
     <div class="msgs" id="msgs">
       <div class="bubble ai">
-        Hi, I'm your <strong>Portfolio Agent</strong> - powered by Vertex AI, Gemini 2.5, Google ADK, and MongoDB. Ask me anything about your holdings, or tell me to add a stock.
+        Hi, I'm your <strong>Portfolio Agent</strong>. Ask me to explain risk, build a starter research plan, save a watchlist idea, or preview a trade before you act.
       </div>
     </div>
     <div class="chips">
@@ -1760,7 +1961,6 @@ function renderStarterIdeas() {
       const risk = escapeHtml(idea.risk);
       const check = escapeHtml(idea.check);
       const askPrompt = `I am starting from zero. Explain ${idea.ticker} in beginner-friendly terms. Cover: what it is, whether it has momentum, why people may research it, the bull case, the bear case, what risk level it has, and what to check before adding it to my watchlist. Do not give buy or sell advice and do not promise future returns.`;
-      const savePrompt = `Add ${idea.ticker} to my watchlist with note: ${idea.tag} - beginner research idea`;
       return `<div class="idea-card">
         <div class="idea-head">
           <span class="idea-ticker">${ticker}</span>
@@ -1773,7 +1973,7 @@ function renderStarterIdeas() {
         </div>
         <div class="starter-actions">
           <button class="research-btn" onclick="send('${escapeAttr(askPrompt)}')">Ask AI</button>
-          <button class="research-btn" onclick="send('${escapeAttr(savePrompt)}')">Add to Watchlist</button>
+          <button class="research-btn" onclick="saveIdeaToWatchlist('${escapeAttr(idea.ticker)}', '${escapeAttr(idea.tag)} - beginner research idea')">Add to Watchlist</button>
         </div>
       </div>`;
     }).join('');
@@ -2037,6 +2237,21 @@ const msgsEl = $('msgs');
 const inp = $('inp');
 const sbtn = $('sbtn');
 inp.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+const heroInp = $('hero-inp');
+if (heroInp) {
+  heroInp.addEventListener('keydown', e => { if (e.key === 'Enter') sendFromHero(); });
+}
+['wl-add-ticker', 'wl-add-note'].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') addWatchlistFromForm(); });
+});
+
+function sendFromHero(txt = '') {
+  const msg = (txt || (heroInp ? heroInp.value : '')).trim();
+  if (!msg) return;
+  if (heroInp) heroInp.value = '';
+  send(msg);
+}
 
 function bubble(content, type) {
   const d = document.createElement('div');
@@ -2295,7 +2510,7 @@ async function loadWatchlistFull() {
     const items = await fetch('/api/watchlist').then(r => r.json());
     $('wl-count').textContent = items.length + ' stock' + (items.length === 1 ? '' : 's');
     if (!Array.isArray(items) || items.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Your watchlist is empty - ask the agent to add tickers.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Your watchlist is empty - save a research idea above.</td></tr>';
       return;
     }
     tbody.innerHTML = items.map(item => {
@@ -2317,6 +2532,54 @@ async function loadWatchlistFull() {
   } catch (e) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Watchlist unavailable.</td></tr>';
   }
+}
+
+async function saveIdeaToWatchlist(ticker, note = '') {
+  const cleanTicker = String(ticker || '').trim().toUpperCase();
+  if (!cleanTicker) return false;
+
+  try {
+    const res = await fetch('/api/watchlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker: cleanTicker, note }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Could not save watchlist item');
+
+    bubble(`${escapeHtml(cleanTicker)} saved to your watchlist${data.added_price ? ` at ${fmt(data.added_price)}` : ''}.`, 'ai');
+    await loadWatchlistFull();
+    await loadWatchlistMini();
+    await loadMemorySummary();
+    return true;
+  } catch (e) {
+    bubble(escapeHtml(e.message || 'Watchlist save failed.'), 'err');
+    return false;
+  }
+}
+
+async function addWatchlistFromForm() {
+  const tickerEl = $('wl-add-ticker');
+  const noteEl = $('wl-add-note');
+  const btn = $('wl-add-btn');
+  const ticker = tickerEl.value.trim().toUpperCase();
+  const note = noteEl.value.trim();
+
+  if (!ticker) {
+    bubble('Type a ticker first, for example VTI or NVDA.', 'err');
+    tickerEl.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  const saved = await saveIdeaToWatchlist(ticker, note);
+  if (saved) {
+    tickerEl.value = '';
+    noteEl.value = '';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Save to Watchlist';
 }
 
 // ── Pre-trade preview ─────────────────────────────────────────────────────────
@@ -2683,13 +2946,13 @@ function renderQuiz() {
   const isLast = _quizStep === QUIZ_QUESTIONS.length - 1;
 
   container.innerHTML = `
-    <div class="quiz-dots">${dots}</div>
     <div class="quiz-q">
       <div class="quiz-question">${q.q}</div>
       <div class="quiz-options">${opts}</div>
     </div>
     <div class="quiz-nav">
       ${_quizStep > 0 ? `<button class="gen-btn" style="background:var(--surface2);color:var(--text)" onclick="quizBack()">← Back</button>` : '<span></span>'}
+      <div class="quiz-dots" aria-label="Quiz progress">${dots}</div>
       <button class="gen-btn" ${canNext ? '' : 'disabled style="opacity:.4;cursor:default"'} onclick="quizNext()">
         ${isLast ? 'See My Profile →' : 'Next →'}
       </button>

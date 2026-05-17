@@ -94,6 +94,27 @@ def get_watchlist():
     return jsonify(enriched)
 
 
+@app.route("/api/watchlist", methods=["POST"])
+def add_watchlist_item():
+    body = request.get_json(force=True)
+    ticker = body.get("ticker", "").upper().strip()
+    note = body.get("note", "").strip()
+
+    if not ticker:
+        return jsonify({"error": "ticker is required"}), 400
+
+    price_data = market_data.get_price(ticker)
+    added_price = price_data.get("price", 0)
+    mongodb_client.add_to_watchlist(USER_ID, ticker, note, added_price=added_price)
+
+    return jsonify({
+        "status": "ok",
+        "ticker": ticker,
+        "note": note,
+        "added_price": added_price,
+    })
+
+
 # ── Pre-trade preview ─────────────────────────────────────────────────────────
 
 @app.route("/api/preview-trade", methods=["POST"])
