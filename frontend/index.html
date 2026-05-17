@@ -1303,7 +1303,7 @@ tbody tr:hover td { background: var(--surface2); }
           <canvas id="goal-chart" height="140"></canvas>
         </div>
         <div style="padding:8px 18px 14px;display:flex;justify-content:flex-end">
-          <button class="gen-btn" id="goal-ask-btn" onclick="askAboutGoal()">Ask AI about this goal</button>
+      <button class="gen-btn" id="goal-ask-btn" onclick="askAboutGoal()">Ask AI for learning steps</button>
         </div>
       </div>
 
@@ -2585,7 +2585,7 @@ const PROFILES = {
       { ticker: "SGOV", note: "Short-term govt bonds — near-cash stability" },
       { ticker: "VTI",  note: "Total US market ETF — broad diversification as your equity slice" },
     ],
-    prompt: "I am a conservative investor who prefers stability. What ETFs and bonds should I research for a low-risk, diversified portfolio? Explain the risks of each suggestion.",
+    prompt: "I am a conservative beginner who prefers stability. Give me an educational research plan for lower-risk diversified ideas, including ETFs and bonds to learn about. Explain the risks of each idea and do not give buy or sell instructions.",
   },
   Balanced: {
     emoji: "⚖️",
@@ -2602,7 +2602,7 @@ const PROFILES = {
       { ticker: "VXUS", note: "International exposure — reduces US concentration" },
       { ticker: "BND",  note: "Bond allocation — smooths volatility during downturns" },
     ],
-    prompt: "I am a balanced investor aiming for steady growth with some downside protection. Suggest a research starting point for ETFs and bonds, and explain how to think about rebalancing.",
+    prompt: "I am a balanced beginner aiming for steady growth with some downside protection. Give me an educational research starting point for ETFs and bonds, and explain how to think about rebalancing without giving buy or sell instructions.",
   },
   Growth: {
     emoji: "📈",
@@ -2619,7 +2619,7 @@ const PROFILES = {
       { ticker: "VGT",  note: "Technology sector ETF — direct tech exposure" },
       { ticker: "VXUS", note: "International diversification alongside US growth" },
     ],
-    prompt: "I am a growth investor with a long time horizon. What sectors and ETFs should I research for strong long-term growth? What concentration risks should I monitor?",
+    prompt: "I am a growth-focused beginner with a long time horizon. What sectors and ETFs could I research for long-term growth, and what concentration risks should I monitor? Frame this as education, not a buy list.",
   },
   Aggressive: {
     emoji: "🚀",
@@ -2635,7 +2635,7 @@ const PROFILES = {
       { ticker: "ARKK", note: "Disruptive innovation ETF — speculative, diverse themes" },
       { ticker: "SMH",  note: "Semiconductor ETF — broad chip sector exposure" },
     ],
-    prompt: "I am an aggressive investor focused on maximum growth. What high-growth stocks and ETFs should I research? What are the biggest risks I need to monitor with this approach?",
+    prompt: "I am an aggressive beginner focused on maximum growth. What high-growth themes, stocks, and ETFs could I research, and what are the biggest risks to monitor? Frame this as education, not a buy list.",
   },
 };
 
@@ -2760,7 +2760,7 @@ function renderQuizResult(profileName) {
       <div class="profile-ideas">${ideas}</div>
     </div>
     <div class="profile-actions">
-      <button class="gen-btn" onclick="send(${JSON.stringify(p.prompt)})">Ask AI for ${profileName} advice</button>
+      <button class="gen-btn" onclick="send(${JSON.stringify(p.prompt)})">Ask AI for ${profileName} learning plan</button>
       <button class="gen-btn" style="background:var(--surface2);color:var(--text)" onclick="resetQuiz()">Retake quiz</button>
     </div>`;
 }
@@ -2874,7 +2874,7 @@ function askAboutGoal() {
   const ret = document.getElementById('goal-return').value;
   const PV  = document.getElementById('goal-start').value;
   const goalLabel = GOAL_DEFAULTS[_goalType]?.label || 'my goal';
-  const prompt = `I am saving for ${goalLabel}. My target is $${FV}, I can save $${PMT} per month, I have $${PV} already, and I expect ${ret}% annual return. What advice do you have to reach this goal faster, and what risks should I be aware of?`;
+  const prompt = `I am saving for ${goalLabel}. My target is $${FV}, I can save $${PMT} per month, I have $${PV} already, and I expect ${ret}% annual return. Give me an educational, beginner-friendly plan to understand this goal: what steps could help, what risks should I check, and what questions should I ask before making real decisions. Do not guarantee returns.`;
   send(prompt);
 }
 
