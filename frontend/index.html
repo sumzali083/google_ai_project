@@ -1254,6 +1254,129 @@ tbody tr:hover td { background: var(--surface2); }
 .profile-idea-ticker { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 3px; }
 .profile-idea-note { font-size: 11.5px; color: var(--text2); line-height: 1.4; }
 .profile-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+/* Market radar */
+.radar-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.radar-hero h2 {
+  font-size: 22px;
+  margin-bottom: 7px;
+  letter-spacing: 0;
+}
+
+.radar-hero p {
+  color: var(--text2);
+  line-height: 1.55;
+  max-width: 760px;
+}
+
+.radar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.radar-column {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.radar-column-head {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.radar-column-head strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.radar-column-head span {
+  color: var(--text2);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.radar-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.radar-card {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.radar-card:last-child { border-bottom: 0; }
+
+.radar-ticker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.radar-meta {
+  color: var(--text2);
+  font-size: 11.5px;
+  margin-top: 3px;
+}
+
+.radar-score {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  background:
+    conic-gradient(var(--accent) var(--score-deg, 0deg), var(--border) 0deg),
+    var(--surface2);
+}
+
+.radar-score span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.radar-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.radar-note {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 13px 14px;
+  color: var(--text2);
+  line-height: 1.55;
+}
+
 /* ── Goal Planner ── */
 .goal-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
 .goal-btn {
@@ -1287,7 +1410,7 @@ tbody tr:hover td { background: var(--surface2); }
   .ins-grid { grid-template-columns: repeat(2, 1fr); }
   .starter-hero { grid-template-columns: 1fr; }
   .starter-hero-actions { justify-content: flex-start; }
-  .starter-grid, .idea-grid, .advisor-hero, .advisor-grid { grid-template-columns: 1fr; }
+  .starter-grid, .idea-grid, .advisor-hero, .advisor-grid, .radar-grid, .radar-hero { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -1319,6 +1442,7 @@ tbody tr:hover td { background: var(--surface2); }
     <div class="tab-bar">
       <button class="tab-btn" onclick="switchTab('start', this)">Start Here</button>
       <button class="tab-btn" onclick="switchTab('advisor', this)">Financial Advisor</button>
+      <button class="tab-btn" onclick="switchTab('radar', this)">Market Radar</button>
       <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
       <button class="tab-btn" onclick="switchTab('watchlist', this)">Watchlist</button>
       <button class="tab-btn" onclick="switchTab('insights', this)">Insights</button>
@@ -1399,6 +1523,23 @@ tbody tr:hover td { background: var(--surface2); }
             <div class="plan-text"><strong>Preview before buying</strong><span>Test the trade first and let the agent flag concentration risks.</span></div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div id="tab-radar" class="tab-pane hidden">
+      <div class="radar-hero">
+        <div>
+          <div class="starter-kicker">Market Radar</div>
+          <h2>Find ideas to research, then run them through guardrails.</h2>
+          <p>PortfolioAI separates recent momentum, steadier core ideas, and speculative themes. Scores use recent price history as a research signal only. They are not predictions, guarantees, or buy recommendations.</p>
+        </div>
+        <button class="gen-btn" onclick="loadMarketRadar(true)">Refresh Radar</button>
+      </div>
+      <div class="radar-note">
+        Beginner rule: a trending stock is not automatically a good fit. Save interesting ideas to your watchlist, ask the agent to explain the risks, then use the Before You Buy check before adding anything to your portfolio.
+      </div>
+      <div id="radar-grid" class="radar-grid">
+        <div class="empty-msg">Loading market radar...</div>
       </div>
     </div>
 
@@ -2315,6 +2456,7 @@ let riskChart = null;
 let _portfolio = null;  // cached portfolio response
 let _summaryFetched = false;
 let _ideasFetched = false;
+let _radarFetched = false;
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
@@ -2324,6 +2466,7 @@ function switchTab(name, btn) {
   btn.classList.add('active');
 
   if (name === 'watchlist') loadWatchlistFull();
+  if (name === 'radar') loadMarketRadar();
   if (name === 'insights') {
     if (_portfolio) populateInsights(_portfolio);
     loadRules();
@@ -2580,6 +2723,50 @@ async function addWatchlistFromForm() {
   }
   btn.disabled = false;
   btn.textContent = 'Save to Watchlist';
+}
+
+async function loadMarketRadar(force = false) {
+  const grid = $('radar-grid');
+  if (!grid || (_radarFetched && !force)) return;
+  grid.innerHTML = '<div class="empty-msg">Checking live market data...</div>';
+
+  try {
+    const groups = await fetch('/api/market-radar').then(r => r.json());
+    _radarFetched = true;
+    grid.innerHTML = groups.map(group => {
+      const items = (group.items || []).map(item => {
+        const score = Number(item.trend_score || 0);
+        const oneMonth = item.one_month_return == null ? '--' : pct(item.one_month_return);
+        const threeMonth = item.three_month_return == null ? '--' : pct(item.three_month_return);
+        const price = item.price ? fmt(item.price) : '--';
+        const note = `${group.name}: ${item.risk} risk research idea. 1m ${oneMonth}, 3m ${threeMonth}.`;
+        const explainPrompt = `Explain ${item.ticker} as a beginner-friendly research idea. It appears in ${group.name}. Current price is ${price}, 1 month return is ${oneMonth}, 3 month return is ${threeMonth}, risk label is ${item.risk}. Explain why it might be interesting, what could go wrong, and what portfolio guardrails to check. Do not give buy or sell advice.`;
+        return `<div class="radar-card">
+          <div>
+            <div class="radar-ticker">${escapeHtml(item.ticker)}</div>
+            <div class="radar-meta">${price} · Today ${pct(item.change_pct || 0)}</div>
+            <div class="radar-meta">1m ${oneMonth} · 3m ${threeMonth} · Risk ${escapeHtml(item.risk)}</div>
+          </div>
+          <div class="radar-score" style="--score-deg:${score * 3.6}deg"><span>${score}</span></div>
+          <div class="radar-actions">
+            <button class="research-btn" onclick="send('${escapeAttr(explainPrompt)}')">Ask AI</button>
+            <button class="research-btn" onclick="saveIdeaToWatchlist('${escapeAttr(item.ticker)}', '${escapeAttr(note)}')">Save</button>
+            <button class="research-btn" onclick="sendFromHero('Preview buying 10 shares of ${escapeAttr(item.ticker)} at the current price')">Preview</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="radar-column">
+        <div class="radar-column-head">
+          <strong>${escapeHtml(group.name)}</strong>
+          <span>${escapeHtml(group.description)}</span>
+        </div>
+        <div class="radar-list">${items}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    grid.innerHTML = '<div class="empty-msg">Market radar unavailable. Try again in a moment.</div>';
+  }
 }
 
 // ── Pre-trade preview ─────────────────────────────────────────────────────────

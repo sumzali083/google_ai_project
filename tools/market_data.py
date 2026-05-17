@@ -28,6 +28,15 @@ _DEMO_FALLBACK_PRICES = {
     "XLV": 150.0,
     "BND": 73.0,
     "SGOV": 100.7,
+    "QQQ": 623.5,
+    "SMH": 306.2,
+    "VXUS": 72.4,
+    "TSLA": 421.3,
+    "ARKK": 82.1,
+    "PLTR": 124.8,
+    "COIN": 256.4,
+    "SOFI": 28.9,
+    "AMD": 214.6,
 }
 
 

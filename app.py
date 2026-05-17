@@ -1,6 +1,7 @@
 """Flask API server — bridges the frontend and the Gemini agent."""
 
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
@@ -14,6 +15,26 @@ app = Flask(__name__, static_folder="frontend")
 CORS(app)
 
 USER_ID = os.environ.get("DEFAULT_USER_ID", "demo_user")
+_DEMO_RADAR_RETURNS = {
+    "NVDA": (18.4, 42.7),
+    "MSFT": (7.8, 19.2),
+    "AAPL": (5.1, 12.4),
+    "AMZN": (9.6, 21.3),
+    "SMH": (14.2, 36.9),
+    "QQQ": (6.9, 17.5),
+    "VTI": (3.2, 8.6),
+    "SPY": (3.5, 9.1),
+    "VXUS": (2.1, 6.4),
+    "BND": (0.7, 2.2),
+    "SGOV": (0.4, 1.2),
+    "XLV": (2.8, 7.1),
+    "TSLA": (22.6, 48.3),
+    "ARKK": (15.9, 31.5),
+    "PLTR": (19.8, 52.1),
+    "COIN": (16.7, 39.4),
+    "SOFI": (13.4, 28.6),
+    "AMD": (11.5, 24.9),
+}
 
 
 # ── Chat ──────────────────────────────────────────────────────────────────────
@@ -75,6 +96,45 @@ def get_history():
 @app.route("/api/memory", methods=["GET"])
 def get_memory():
     return jsonify(mongodb_client.get_memory_summary(USER_ID))
+
+
+@app.route("/api/market-radar", methods=["GET"])
+def market_radar():
+    """Educational research radar: momentum, steadier funds, and speculative ideas."""
+    groups = [
+        {
+            "name": "Momentum Watch",
+            "description": "Recent strength to research. Momentum is a clue, not a forecast.",
+            "risk": "Higher",
+            "tickers": ["NVDA", "MSFT", "AAPL", "AMZN", "SMH", "QQQ"],
+        },
+        {
+            "name": "Steadier Core",
+            "description": "Diversified or lower-volatility ideas beginners commonly research first.",
+            "risk": "Lower to Medium",
+            "tickers": ["VTI", "SPY", "VXUS", "BND", "SGOV", "XLV"],
+        },
+        {
+            "name": "Speculative Themes",
+            "description": "Popular higher-volatility names where guardrails matter most.",
+            "risk": "High",
+            "tickers": ["TSLA", "ARKK", "PLTR", "COIN", "SOFI", "AMD"],
+        },
+    ]
+
+    results = []
+    for group in groups:
+        items = []
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            futures = {
+                executor.submit(_radar_item, ticker, group["name"], group["risk"]): ticker
+                for ticker in group["tickers"]
+            }
+            for future in as_completed(futures):
+                items.append(future.result())
+        items.sort(key=lambda item: item["trend_score"], reverse=True)
+        results.append({**group, "items": items})
+    return jsonify(results)
 
 
 # ── Watchlist ─────────────────────────────────────────────────────────────────
@@ -235,6 +295,47 @@ def _hhi_score(sectors: list) -> int:
         return 0
     hhi = sum((s["weight_pct"] / 100) ** 2 for s in sectors)
     return round((1 - hhi) * 100)
+
+
+def _radar_item(ticker: str, group_name: str, risk_label: str) -> dict:
+    price_data = market_data.get_price(ticker)
+    try:
+        history = market_data.get_history(ticker, period="3mo")
+    except Exception:
+        history = []
+    closes = [row["close"] for row in history if row.get("close")]
+
+    one_month_return = None
+    three_month_return = None
+    trend_score = 50
+
+    if len(closes) >= 2:
+        latest = closes[-1]
+        start = closes[0]
+        three_month_return = round((latest - start) / start * 100, 2) if start else None
+        month_start = closes[-22] if len(closes) >= 22 else closes[0]
+        one_month_return = round((latest - month_start) / month_start * 100, 2) if month_start else None
+    else:
+        fallback = _DEMO_RADAR_RETURNS.get(ticker)
+        if fallback:
+            one_month_return, three_month_return = fallback
+
+    if one_month_return is not None:
+        momentum = max(min(one_month_return or 0, 25), -25)
+        stability_penalty = 12 if risk_label == "High" else 4 if risk_label == "Higher" else 0
+        trend_score = int(max(0, min(100, 50 + momentum * 1.5 - stability_penalty)))
+
+    return {
+        "ticker": ticker,
+        "price": price_data.get("price", 0),
+        "change_pct": price_data.get("change_pct", 0),
+        "one_month_return": one_month_return,
+        "three_month_return": three_month_return,
+        "trend_score": trend_score,
+        "group": group_name,
+        "risk": risk_label,
+        "source": price_data.get("source", "market_data"),
+    }
 
 
 def _evaluate_rules(allocation: dict, detailed: bool = False) -> list:
