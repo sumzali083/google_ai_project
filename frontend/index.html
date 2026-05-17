@@ -61,10 +61,11 @@ body {
   color: var(--text);
   font-family: 'Inter', sans-serif;
   font-size: 13.5px;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   transition: background .2s, color .2s;
 }
 
@@ -314,7 +315,7 @@ nav {
 }
 
 .dash {
-  overflow-y: auto;
+  overflow: visible;
   padding: 18px 20px 26px;
   display: flex;
   flex-direction: column;
