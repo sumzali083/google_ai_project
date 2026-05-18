@@ -60,6 +60,29 @@ def chat():
 
 # ── Portfolio ─────────────────────────────────────────────────────────────────
 
+@app.route("/api/holdings", methods=["POST"])
+def add_holding():
+    body = request.get_json(force=True)
+    ticker = body.get("ticker", "").upper().strip()
+    try:
+        shares   = float(body.get("shares", 0))
+        avg_cost = float(body.get("avg_cost", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "shares and avg_cost must be numbers"}), 400
+    if not ticker or shares <= 0 or avg_cost <= 0:
+        return jsonify({"error": "Provide a valid ticker, shares > 0, and avg_cost > 0"}), 400
+    info   = market_data.get_info(ticker)
+    sector = info.get("sector", "Unknown")
+    mongodb_client.upsert_holding(USER_ID, ticker, shares, avg_cost, sector)
+    return jsonify({"status": "ok", "ticker": ticker, "shares": shares, "avg_cost": avg_cost, "sector": sector})
+
+
+@app.route("/api/holdings/<ticker>", methods=["DELETE"])
+def remove_holding(ticker):
+    mongodb_client.delete_holding(USER_ID, ticker.upper())
+    return jsonify({"status": "ok"})
+
+
 @app.route("/api/portfolio", methods=["GET"])
 def get_portfolio():
     holdings = mongodb_client.get_holdings(USER_ID)

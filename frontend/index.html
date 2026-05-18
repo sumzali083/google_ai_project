@@ -1618,6 +1618,16 @@ tbody tr:hover td { background: var(--surface2); }
             </div>
           </div>
           <div class="agent-panel">
+            <div class="stat-label">Add Holding</div>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:10px">
+              <input id="ah-ticker" type="text" placeholder="Ticker — e.g. AAPL" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-size:13px;outline:none;width:100%;text-transform:uppercase" />
+              <input id="ah-shares" type="number" placeholder="Shares" min="0.01" step="0.01" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;width:100%" />
+              <input id="ah-price" type="number" placeholder="Price paid per share ($)" min="0.01" step="0.01" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;width:100%" />
+              <button class="gen-btn" style="width:100%;justify-content:center" onclick="addHoldingDirect()">Add to Portfolio</button>
+              <div id="ah-msg" style="font-size:12px;min-height:16px;color:var(--green)"></div>
+            </div>
+          </div>
+          <div class="agent-panel">
             <div class="stat-label">Live Status</div>
             <div class="activity-list" style="grid-template-columns:1fr">
               <div class="activity-item"><strong>Gemini</strong><span id="agent-step-ai">Ready to reason over your portfolio.</span></div>
@@ -1919,10 +1929,11 @@ tbody tr:hover td { background: var(--surface2); }
               <th>Value</th>
               <th>P&amp;L <span class="info-dot simple-help" tabindex="0" data-tip="Profit and loss: how much the holding is up or down compared with your cost.">i</span></th>
               <th>Return</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="hbody">
-            <tr><td colspan="7" class="empty-msg">Loading portfolio...</td></tr>
+            <tr><td colspan="8" class="empty-msg">Loading portfolio...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2456,7 +2467,7 @@ async function loadPortfolio() {
 
     const tbody = $('hbody');
     if (!d.holdings || d.holdings.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No holdings yet - ask the agent to add some stocks.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No holdings yet — use the Add Holding form or ask the agent.</td></tr>';
     } else {
       tbody.innerHTML = d.holdings.map(h => `
         <tr>
@@ -2467,6 +2478,7 @@ async function loadPortfolio() {
           <td>${fmt(h.market_value)}</td>
           <td class="${cls(h.unrealised_gain)}">${fmt(h.unrealised_gain)}</td>
           <td class="${cls(h.unrealised_gain_pct)}">${pct(h.unrealised_gain_pct)}</td>
+          <td><button onclick="removeHolding('${escapeHtml(h.ticker)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px" title="Remove holding">✕</button></td>
         </tr>`).join('');
     }
 
@@ -3481,6 +3493,55 @@ function askAboutGoal() {
   const goalLabel = GOAL_DEFAULTS[_goalType]?.label || 'my goal';
   const prompt = `I am saving for ${goalLabel}. My target is $${FV}, I can save $${PMT} per month, I have $${PV} already, and I expect ${ret}% annual return. Give me an educational, beginner-friendly plan to understand this goal: what steps could help, what risks should I check, and what questions should I ask before making real decisions. Do not guarantee returns.`;
   send(prompt);
+}
+
+// ── Add Holding form ──────────────────────────────────────────────────────────
+
+async function addHoldingDirect() {
+  const ticker   = document.getElementById('ah-ticker').value.trim().toUpperCase();
+  const shares   = parseFloat(document.getElementById('ah-shares').value);
+  const avg_cost = parseFloat(document.getElementById('ah-price').value);
+  const msg      = document.getElementById('ah-msg');
+
+  if (!ticker || !shares || !avg_cost) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Fill in all three fields.';
+    return;
+  }
+
+  const btn = document.querySelector('[onclick="addHoldingDirect()"]');
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+  msg.textContent = '';
+
+  try {
+    const res  = await fetch('/api/holdings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker, shares, avg_cost }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    msg.style.color  = 'var(--green)';
+    msg.textContent  = `✓ Added ${shares} ${ticker} @ $${avg_cost}`;
+    document.getElementById('ah-ticker').value = '';
+    document.getElementById('ah-shares').value = '';
+    document.getElementById('ah-price').value  = '';
+    await loadPortfolio();
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message;
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Add to Portfolio';
+  }
+}
+
+async function removeHolding(ticker) {
+  if (!confirm(`Remove ${ticker} from your portfolio?`)) return;
+  await fetch(`/api/holdings/${ticker}`, { method: 'DELETE' });
+  await loadPortfolio();
 }
 
 loadPortfolio();
