@@ -1513,10 +1513,10 @@ tbody tr:hover td { background: var(--surface2); }
     <!-- Tab bar -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('agent', this)">Agent</button>
+      <button class="tab-btn" onclick="switchTab('overview', this)">Portfolio</button>
       <button class="tab-btn" onclick="switchTab('advisor', this)">Plan</button>
       <button class="tab-btn" onclick="switchTab('radar', this)">Research</button>
       <button class="tab-btn" onclick="switchTab('insights', this)">Guardrails</button>
-      <button class="tab-btn" onclick="switchTab('watchlist', this)">Watchlist</button>
       <div class="demo-menu">
         <button class="tab-btn">Demo</button>
         <div class="demo-options">
@@ -1727,6 +1727,44 @@ tbody tr:hover td { background: var(--surface2); }
       <div id="radar-grid" class="radar-grid">
         <div class="empty-msg">Loading market radar...</div>
       </div>
+
+      <div class="watchlist-add card" style="margin-top:16px">
+        <div class="watchlist-add-copy">
+          <strong>Save a research idea</strong>
+          Track stocks or ETFs you are curious about. PortfolioAI captures the current price so you can see what happened later.
+        </div>
+        <div class="watchlist-field">
+          <label for="wl-add-ticker">Ticker</label>
+          <input id="wl-add-ticker" type="text" placeholder="VTI" autocomplete="off" />
+        </div>
+        <div class="watchlist-field">
+          <label for="wl-add-note">Reason to watch</label>
+          <input id="wl-add-note" type="text" placeholder="Broad market core fund to research" autocomplete="off" />
+        </div>
+        <button class="gen-btn" id="wl-add-btn" onclick="addWatchlistFromForm()">Save to Watchlist</button>
+      </div>
+      <div class="card table-card" style="margin-top:12px">
+        <div class="card-head">
+          <span class="card-head-title">Watchlist <span class="info-dot simple-help" tabindex="0" data-tip="Stocks or ETFs saved as research ideas. They are not recommendations to buy.">i</span></span>
+          <span class="card-head-meta" id="wl-count">--</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left">Ticker</th>
+              <th>Price</th>
+              <th>Today</th>
+              <th>Since Added</th>
+              <th style="text-align:left">Note</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="wl-body">
+            <tr><td colspan="6" class="empty-msg">Loading watchlist...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="wl-hint">You can also tell the agent: "Add NVDA to my watchlist with note: potential buy on dip".</p>
     </div>
 
     <div id="tab-advisor" class="tab-pane hidden">
@@ -1839,81 +1877,6 @@ tbody tr:hover td { background: var(--surface2); }
     </div>
 
     <div id="tab-overview" class="tab-pane hidden">
-      <div class="agent-hero">
-        <div>
-          <div class="agent-kicker">PortfolioAI Command Center</div>
-          <h2>Ask the agent before you act.</h2>
-          <p>Use plain English to understand risk, save watchlist ideas, or preview a trade. The dashboard updates from MongoDB memory after the agent acts.</p>
-        </div>
-        <div class="agent-hero-box">
-          <div class="agent-hero-input">
-            <input id="hero-inp" type="text" placeholder="Ask: I am starting from zero, what should I research first?" autocomplete="off" />
-            <button class="send-btn" onclick="sendFromHero()" aria-label="Ask PortfolioAI">
-              <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-            </button>
-          </div>
-          <div class="hero-chip-row">
-            <button class="hero-chip" onclick="sendFromHero('I am starting from zero, what should I research first?')">Starter plan</button>
-            <button class="hero-chip" onclick="sendFromHero('What are my biggest risks?')">Biggest risks</button>
-            <button class="hero-chip" onclick="sendFromHero('Add VTI to my watchlist with note: broad market core fund to research')">Save VTI idea</button>
-            <button class="hero-chip" onclick="sendFromHero('Preview buying 10 shares of NVDA at the current price')">Preview NVDA</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">Total Value</div>
-          <div class="stat-val" id="sv">--</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Cost Basis <span class="info-dot simple-help" tabindex="0" data-tip="The total amount you originally paid for your current holdings.">i</span></div>
-          <div class="stat-val" id="sc">--</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Unrealised P&amp;L <span class="info-dot simple-help" tabindex="0" data-tip="Your gain or loss so far if you sold at the current live price. It is not locked in yet.">i</span></div>
-          <div class="stat-val" id="sp">--</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Return <span class="info-dot simple-help" tabindex="0" data-tip="The percentage gain or loss compared with your cost basis.">i</span></div>
-          <div class="stat-val" id="spp">--</div>
-        </div>
-      </div>
-
-      <div class="insight-row">
-        <div class="stat compact">
-          <div class="stat-label">MongoDB Memory <span class="info-dot simple-help" tabindex="0" data-tip="MongoDB stores the agent's long-term portfolio memory: holdings, watchlist ideas, rules, and history.">i</span></div>
-          <div class="health-copy">Persistent agent memory synced from Atlas.</div>
-          <div class="memory-grid">
-            <div class="memory-chip"><strong id="mem-holdings">--</strong><span>Holdings</span></div>
-            <div class="memory-chip"><strong id="mem-watchlist">--</strong><span>Watchlist</span></div>
-            <div class="memory-chip"><strong id="mem-rules">--</strong><span>Rules</span></div>
-            <div class="memory-chip"><strong id="mem-snapshots">--</strong><span>Snapshots</span></div>
-          </div>
-        </div>
-        <div class="stat compact">
-          <div class="stat-label">Diversification Score <span class="info-dot simple-help" tabindex="0" data-tip="A simple score for how spread out your portfolio is across sectors. Higher usually means less concentration risk.">i</span></div>
-          <div class="health-wrap">
-            <div class="health-score" id="health-ring"><span id="health-score">--</span></div>
-            <div class="health-copy" id="health-copy">Waiting for live holdings.</div>
-          </div>
-        </div>
-        <div class="stat compact">
-          <div class="stat-label">Agent Activity</div>
-          <div class="activity-list">
-            <div class="activity-item"><strong>Gemini</strong><span id="agent-step-ai">Ready to reason over your portfolio.</span></div>
-            <div class="activity-item"><strong>MongoDB</strong><span id="agent-step-db">Loading holdings memory.</span></div>
-            <div class="activity-item"><strong>Market</strong><span id="agent-step-market">Checking live prices.</span></div>
-          </div>
-        </div>
-        <div class="stat compact">
-          <div class="stat-label">Watchlist Preview</div>
-          <div class="watchlist-mini" id="watchlist-mini">
-            <span class="watch-pill">No saved ideas yet</span>
-          </div>
-        </div>
-      </div>
-
       <div class="card table-card">
         <div class="card-head">
           <span class="card-head-title">Holdings</span>
@@ -1975,46 +1938,6 @@ tbody tr:hover td { background: var(--surface2); }
     </div>
 
     <!-- ── Watchlist ── -->
-    <div id="tab-watchlist" class="tab-pane hidden">
-      <div class="watchlist-add card">
-        <div class="watchlist-add-copy">
-          <strong>Save a research idea</strong>
-          Track stocks or ETFs you are curious about. PortfolioAI captures the current price so you can see what happened later.
-        </div>
-        <div class="watchlist-field">
-          <label for="wl-add-ticker">Ticker</label>
-          <input id="wl-add-ticker" type="text" placeholder="VTI" autocomplete="off" />
-        </div>
-        <div class="watchlist-field">
-          <label for="wl-add-note">Reason to watch</label>
-          <input id="wl-add-note" type="text" placeholder="Broad market core fund to research" autocomplete="off" />
-        </div>
-        <button class="gen-btn" id="wl-add-btn" onclick="addWatchlistFromForm()">Save to Watchlist</button>
-      </div>
-      <div class="card table-card">
-        <div class="card-head">
-          <span class="card-head-title">Watchlist <span class="info-dot simple-help" tabindex="0" data-tip="Stocks or ETFs saved as research ideas. They are not recommendations to buy.">i</span></span>
-          <span class="card-head-meta" id="wl-count">--</span>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="text-align:left">Ticker</th>
-              <th>Price</th>
-              <th>Today</th>
-              <th>Since Added</th>
-              <th style="text-align:left">Note</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="wl-body">
-            <tr><td colspan="6" class="empty-msg">Loading watchlist...</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="wl-hint">You can also tell the agent: "Add NVDA to my watchlist with note: potential buy on dip". Saved ideas are educational research notes, not buy recommendations.</p>
-    </div>
-
     <!-- ── Insights ── -->
     <div id="tab-insights" class="tab-pane hidden">
       <div class="ins-grid">
@@ -2626,8 +2549,7 @@ function switchTab(name, btn) {
   document.getElementById('tab-' + name).classList.remove('hidden');
   if (btn) btn.classList.add('active');
 
-  if (name === 'watchlist') loadWatchlistFull();
-  if (name === 'radar') loadMarketRadar();
+  if (name === 'radar') { loadMarketRadar(); loadWatchlistFull(); }
   if (name === 'insights') {
     if (_portfolio) populateInsights(_portfolio);
     loadRules();
@@ -2677,7 +2599,7 @@ async function resetBeginnerPortfolio() {
     await loadPortfolio();
     await loadWatchlistMini();
     await loadMemorySummary();
-    if (!document.getElementById('tab-watchlist').classList.contains('hidden')) {
+    if (!document.getElementById('tab-radar').classList.contains('hidden')) {
       loadWatchlistFull();
     }
     if (!document.getElementById('tab-insights').classList.contains('hidden')) {
