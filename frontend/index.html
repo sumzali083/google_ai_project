@@ -215,6 +215,47 @@ nav {
   background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
 }
 
+.action-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-panel-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.action-panel-copy {
+  color: var(--text2);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.action-panel-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.mini-action {
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 9px;
+}
+
+.mini-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .agent-hero {
   display: grid;
   grid-template-columns: minmax(260px, .9fr) minmax(360px, 1.1fr);
@@ -1593,6 +1634,18 @@ tbody tr:hover td { background: var(--surface2); }
 
         <aside class="agent-actions">
           <div class="agent-panel">
+            <div class="stat-label">Action Panel</div>
+            <div class="action-panel-body" id="action-panel">
+              <div class="action-panel-title">Ask anything to open the right workspace.</div>
+              <div class="action-panel-copy">PortfolioAI will surface the most useful tab, tool, or next step based on your message.</div>
+              <div class="action-panel-links">
+                <button class="mini-action" onclick="openTabByName('advisor')">Plan</button>
+                <button class="mini-action" onclick="openTabByName('radar')">Research</button>
+                <button class="mini-action" onclick="openTabByName('insights')">Guardrails</button>
+              </div>
+            </div>
+          </div>
+          <div class="agent-panel">
             <div class="stat-label">Quick Actions</div>
             <div class="agent-primary-actions">
               <button class="agent-action-btn" onclick="send('I am starting from zero. Build me a beginner-friendly research plan with core funds, trend ideas, steadier options, and risks to check. Do not give buy or sell advice.')">
@@ -2496,12 +2549,70 @@ function showTyping() {
   return d;
 }
 
+function setActionPanel(kind, msg = '') {
+  const panel = $('action-panel');
+  if (!panel) return;
+  const lower = String(msg).toLowerCase();
+  let title = 'Working on it';
+  let copy = 'I am choosing the best workspace for this request.';
+  let links = [
+    ['Plan', "openTabByName('advisor')"],
+    ['Research', "openTabByName('radar')"],
+    ['Guardrails', "openTabByName('insights')"],
+  ];
+
+  if (kind === 'error') {
+    title = 'Try again in a moment';
+    copy = 'Cloud Run may be waking up. Your data is still safe in MongoDB.';
+    links = [['Retry last idea', "send('I am starting from zero, what should I research first?')"]];
+  } else if (lower.includes('risk') || lower.includes('concentrat') || lower.includes('guardrail')) {
+    title = 'Risk workspace ready';
+    copy = 'Open guardrails to see concentration alerts, portfolio rules, and before-you-buy checks.';
+    links = [
+      ['Open Guardrails', "openTabByName('insights')"],
+      ['Preview Trade', "openTabByName('insights')"],
+      ['Ask Biggest Risks', "send('What are my biggest risks?')"],
+    ];
+  } else if (lower.includes('start') || lower.includes('beginner') || lower.includes('zero') || lower.includes('plan') || lower.includes('emergency') || lower.includes('goal')) {
+    title = 'Beginner plan tools';
+    copy = 'Use the Plan tab for risk profile, goals, emergency fund topics, and plain-English learning.';
+    links = [
+      ['Open Plan', "openTabByName('advisor')"],
+      ['Risk Quiz', "openTabByName('advisor')"],
+      ['Research Ideas', "openTabByName('radar')"],
+    ];
+  } else if (lower.includes('trend') || lower.includes('research') || lower.includes('safe') || lower.includes('going up')) {
+    title = 'Research radar';
+    copy = 'Compare momentum, steadier core ideas, and speculative themes before saving anything.';
+    links = [
+      ['Open Research', "openTabByName('radar')"],
+      ['Load Radar', 'loadMarketRadar(true)'],
+      ['Watchlist', "openTabByName('watchlist')"],
+    ];
+  } else if (lower.includes('watchlist') || lower.includes('save')) {
+    title = 'Watchlist memory';
+    copy = 'Save ideas with notes. MongoDB remembers first-watch price so you can track what happened later.';
+    links = [
+      ['Open Watchlist', "openTabByName('watchlist')"],
+      ['Save VTI Idea', "send('Add VTI to my watchlist with note: broad market core fund to research')"],
+    ];
+  }
+
+  panel.innerHTML = `
+    <div class="action-panel-title">${escapeHtml(title)}</div>
+    <div class="action-panel-copy">${escapeHtml(copy)}</div>
+    <div class="action-panel-links">
+      ${links.map(([label, action]) => `<button class="mini-action" onclick="${action}">${escapeHtml(label)}</button>`).join('')}
+    </div>`;
+}
+
 async function send(txt) {
   const msg = txt || inp.value.trim();
   if (!msg) return;
   inp.value = '';
   sbtn.disabled = true;
   bubble(escapeHtml(msg), 'me');
+  setActionPanel('thinking', msg);
   const typing = showTyping();
 
   $('agent-step-ai').textContent = 'Routing to Gemini 2.5...';
@@ -2518,17 +2629,20 @@ async function send(txt) {
     typing.remove();
     if (data.error) {
       bubble(escapeHtml(data.error), 'err');
+      setActionPanel('error', msg);
       $('agent-step-ai').textContent = 'Error - check server logs.';
       $('agent-step-db').textContent = 'DB query may have failed.';
       $('agent-step-market').textContent = 'Price fetch status unknown.';
     } else {
       bubble(cleanMarkdown(data.reply), 'ai');
+      setActionPanel('done', msg);
       $('agent-step-ai').textContent = `Last query: "${msg.slice(0, 40)}${msg.length > 40 ? '...' : ''}" at ${now()}`;
       loadPortfolio();
     }
   } catch (e) {
     typing.remove();
     bubble('Temporary connection issue. Cloud Run may still be waking up or finishing a deploy - please try again in a moment.', 'err');
+    setActionPanel('error', msg);
     $('agent-step-ai').textContent = 'Temporary connection issue.';
   }
   sbtn.disabled = false;
